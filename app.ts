@@ -8,6 +8,8 @@ import cookieParser from "cookie-parser";
 //error handler
 import {ErrorMiddleware} from './middleware/error';
 
+import userRouter from "./routes/user.route"
+
 require("dotenv").config()
 
 //body parser
@@ -21,11 +23,15 @@ app.use(cors({
     origin: process.env.ORIGIN
 }));
 
+
+//routes
+app.use("/api/v1",userRouter);
+
 //testing api
 app.get("/test", (req: Request ,res: Response,next:NextFunction) => {
     res.status(200).json({
         success:true,
-        messgae:"API is working",
+        message:"API is working",
     });
 } );
 
