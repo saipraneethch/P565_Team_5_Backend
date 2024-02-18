@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev --respawn --transpile-only server.ts"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
-    "@types/nodemailer": "^6.4.14"
+    "@types/nodemailer": "^6.4.14",
+    "nodemon": "^3.0.3"
   }
 }
