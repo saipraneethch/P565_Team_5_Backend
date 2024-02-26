@@ -8,6 +8,7 @@ import userRouter from "./routes/user.route.js";
 // Configure environment variables
 config();
 
+
 export const app = express();
 
 // Body parser
