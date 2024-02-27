@@ -6,6 +6,8 @@ import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
 //change error handling to match prithvi, follow user controller json line 177
 //throw errors in user model, display in controller 
 
+
+
 // Fetch grades for a specific user
 export const fetchUserGrades = CatchAsyncError(async (req, res, next) => {
   try {
@@ -18,6 +20,8 @@ export const fetchUserGrades = CatchAsyncError(async (req, res, next) => {
     //once you have username, 
     const { userId } = req.params; // Assuming userId is passed as a route parameter
     const user = await userModel.findById(userId); // Find the user by ID
+
+    //
 
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
