@@ -1,13 +1,21 @@
 import express from "express";
 import userModel from "../models/user.model.js";
-import gradeModel from "../models/grade.model.js"; // Import the Grade model
+import Course from "../models/course.model.js"; // Import the Grade model
 import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
-
+//change error handling to match prithvi, follow user controller json line 177
+//throw errors in user model, display in controller 
 
 // Fetch grades for a specific user
 export const fetchUserGrades = CatchAsyncError(async (req, res, next) => {
   try {
+    //fetch session tokern to get userid
+    //useAuthContext function in app.js
+    //if null, means user is not logged in 
+    //use username to get grades rather than user id
+    //topNavbar.js in components folder, see how prithvi fetches username
+    //must fetch username from front end in studentgradespage and then pass to backend
+    //once you have username, 
     const { userId } = req.params; // Assuming userId is passed as a route parameter
     const user = await userModel.findById(userId); // Find the user by ID
 
