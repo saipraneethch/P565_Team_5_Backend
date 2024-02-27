@@ -31,9 +31,14 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Please enter your password'],
+        required: [function() { return this.isLocal; }, 'Please enter your password'],
         minlength: [6, "Password must be at least 6 characters"],
     },
+    isLocal: {
+        type: Boolean,
+        default: true,
+    },
+    
     avatar: {
         public_id: String,
         url: String,

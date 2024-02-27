@@ -5,11 +5,15 @@ import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
 
 
+
+
 // Fetch grades for a specific user
 export const fetchUserGrades = CatchAsyncError(async (req, res, next) => {
   try {
     const { userId } = req.params; // Assuming userId is passed as a route parameter
     const user = await userModel.findById(userId); // Find the user by ID
+
+    //
 
     if (!user) {
       return next(new ErrorHandler("User not found", 404));

@@ -23,7 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 //create token
-const createToken = (_id) => {
+export const createToken = (_id) => {
   return jwt.sign({ _id: _id }, process.env.SECRET, { expiresIn: "3d" });
 };
 
@@ -33,9 +33,10 @@ export const registrationUser = CatchAsyncError(async (req, res, next) => {
     const { first_name, last_name, username, email, password } = req.body;
 
     //validation
-    if (!first_name || !last_name || !username || !email || !password) {
-      throw Error("All fields must be required");
+    if (!first_name.trim() || !last_name.trim() || !username.trim() || !email.trim() || !password.trim()) {
+      throw new Error("All fields must be required");
     }
+    
 
     if (!validator.isEmail(email)) {
       throw Error("Email is not valid");
@@ -256,7 +257,7 @@ export const updatePasswordEmail = CatchAsyncError(async (req, res, next) => {
 });
 
 // Check OTP for update password
-export const updatePasswordCode = CatchAsyncError(async (req, res, next) => {
+export const updatePasswordCode = async (req, res) => {
   try {
     const { activation_code } = req.body; // User-submitted OTP
     const activation_token = req.cookies.activationToken; // Token from cookies
@@ -264,8 +265,9 @@ export const updatePasswordCode = CatchAsyncError(async (req, res, next) => {
     console.log({ activation_token, activation_code });
 
     // Check if activation token is provided
-    if (!activation_token) {
-      return next(new ErrorHandler("No activation token provided", 400));
+    if (activation_code === undefined || activation_code.trim() === '')
+     {
+      throw Error("No activation code provided");
     }
 
     // Verify the activation token
@@ -273,7 +275,7 @@ export const updatePasswordCode = CatchAsyncError(async (req, res, next) => {
     console.log(decoded.activationCode);
     // Compare the OTP from the user input against the one stored in the token
     if (decoded.activationCode !== activation_code) {
-      return next(new ErrorHandler("Invalid activation code", 400));
+      throw Error("Invalid activation code");
     }
 
     // If the OTP matches, proceed with the password update or whatever next steps are required
@@ -282,12 +284,12 @@ export const updatePasswordCode = CatchAsyncError(async (req, res, next) => {
     res.status(200).json({ message: "OTP verified successfully." });
   } catch (error) {
     // This catches any errors including token verification errors
-    return next(new ErrorHandler(error.message, 400));
+    res.status(400).json({ error: error.message });
   }
-});
+};
 
 // Update password in the database
-export const updatePasswordReset = CatchAsyncError(async (req, res, next) => {
+export const updatePasswordReset = async (req, res) => {
   try {
     const { email, password } = req.body;
     
@@ -295,17 +297,11 @@ export const updatePasswordReset = CatchAsyncError(async (req, res, next) => {
     // Find the user by their email
     const user = await userModel.findOne({ email });
     if (!user) {
-      return next(new ErrorHandler('User not found with this email', 404));
+      throw Error('User not found with this email');
     }
     
     console.log("User found:", user); // Confirm user is found
 
-    // Hash the new password
-    // const hashedPassword = await bcrypt.hash(password, 10);
-    // console.log("Hashed password:", hashedPassword); // Confirm hashing worked
-
-    // // Update the user's password in the database
-    // user.password = hashedPassword;
     user.password = password;
     await user.save();
     console.log("User saved with new password"); // Confirm save completed
@@ -313,6 +309,39 @@ export const updatePasswordReset = CatchAsyncError(async (req, res, next) => {
     res.status(200).json({ message: "Password updated successfully." });
   } catch (error) {
     console.error("Error in updatePasswordReset:", error); // Use console.error to log any caught errors
-    return next(new ErrorHandler(error.message, 400));
+    res.status(400).json({ error: error.message });
   }
-});
+};
+
+export const handleOAuthLogin = async (req,res) => {
+
+  const {first_name,last_name,username, email } = req.body;
+  
+  const newUser = {
+    first_name: first_name,
+    last_name: last_name,
+    username: username,
+    email: email,
+    isLocal: false
+  };
+
+  try {
+    let user = await userModel.findOne({ email: email });
+    console.log('User found:', user);
+  
+    if (!user) {
+      console.log('Creating new user');
+      user = await userModel.create(newUser);
+      console.log('New user created:', user);
+    }
+  
+    console.log('User ID for token:', user._id);
+    const token = createToken(user._id);
+    console.log('Token created:', token);
+    res.status(200).json({ username, token });
+  } catch (error) {
+    console.error('Error in handleOAuthLogin:', error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
