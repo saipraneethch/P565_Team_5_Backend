@@ -42,3 +42,4 @@ app.all("*", (req, res, next) => {
 });
 
 app.use(ErrorMiddleware);
+module.exports = {app}
