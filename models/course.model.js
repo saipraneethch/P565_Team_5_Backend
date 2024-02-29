@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 const courseSchema = new mongoose.Schema({
-    courseID:{
+    code: {
         type: String,
-        required: [true],
-        unique: [true]
+        required: [true, 'Please enter course code'],
+        unique: true
     },
     title: {
         type: String,
@@ -14,13 +14,28 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please enter course description'],
     },
+    category: [{
+        type: String, // Assuming categories are just strings; adjust as necessary
+    }],
     instructor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Reference to the User model
         required: true,
+        ref: 'User'
     },
+    start_date: {
+        type: Date,
+        required: true
+    },
+    end_date: {
+        type: Date,
+        required: true
+    },
+    bibliography: [{
+        title: String,
+        author: String,
+    }]
 }, { timestamps: true });
 
-const Course = mongoose.model("Course", courseSchema);
+const courseModel = mongoose.model("Course", courseSchema);
 
-export default Course;
+export default courseModel;

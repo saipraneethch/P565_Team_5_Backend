@@ -160,7 +160,7 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
 
     const token = createToken(user._id);
 
-    res.status(200).json({ email, token });
+    res.status(200).json({ username, role:user.role, token });
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
@@ -173,8 +173,15 @@ export const loginUser = async (req, res) => {
     const user = await userModel.login(username, password);
 
     const token = createToken(user._id);
+    
 
-    res.status(200).json({ username, token });
+    res.status(200).json({ username, role:user.role, token });
+
+    // Destructure the user object to exclude the password when sending it back
+    // const { password: userPassword, ...userWithoutPassword } = user.toObject();
+
+    // // Return the modified user object without the password and the token
+    // res.status(200).json({ user: userWithoutPassword, token });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -338,7 +345,7 @@ export const handleOAuthLogin = async (req, res) => {
     console.log('User ID for token:', user._id);
     const token = createToken(user._id);
     console.log('Token created:', token);
-    res.status(200).json({ username, token });
+    res.status(200).json({ username, role:user.role, token });
   } catch (error) {
     console.error('Error in handleOAuthLogin:', error);
     res.status(400).json({ error: error.message });
