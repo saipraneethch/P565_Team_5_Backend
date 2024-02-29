@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import { ErrorMiddleware } from "./middleware/error.js";
 import userRouter from "./routes/user.route.js";
+import editUserRouter from "./routes/edituser.route.js";
 
 // Configure environment variables
 config();
@@ -25,6 +26,7 @@ app.use(
 
 // Routes
 app.use("/api/v1", userRouter);
+app.use("/api/v1/userdetails", editUserRouter);
 
 // Testing API
 app.get("/test", (req, res, next) => {
