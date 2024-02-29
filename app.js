@@ -28,7 +28,7 @@ app.use(
 // Routes
 app.use("/api/v1", userRouter);
 app.use("/api/v1/userdetails", editUserRouter);
-app.use("/api/v1/courses", courseRouter);
+app.use("/api/v1/coursedetails", courseRouter);
 
 // Testing API
 app.get("/test", (req, res, next) => {

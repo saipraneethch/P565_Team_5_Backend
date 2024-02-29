@@ -5,6 +5,13 @@ import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
 
 
+//get all courses
+export const getCourses = async (req, res) => {
+    
+  const courses = await courseModel.find().sort({code: 1});
+  res.status(200).json(courses);
+}
+
 export const addCourse = async (req, res) => {
 
   console.log(req.body)
