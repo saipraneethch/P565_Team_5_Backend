@@ -1,10 +1,51 @@
 import express from "express";
 import userModel from "../models/user.model.js";
-import gradeModel from "../models/grade.model.js"; // Import the Grade model
+import courseModel from "../models/course.model.js"; // Import the Grade model
 import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
 
 
+export const addCourse = async (req, res) => {
+
+  console.log(req.body)
+  const {code, title, description,category,instructor,start_date,end_date,bibliography} = req.body
+
+  let emptyFields = []
+
+  if(!code){
+      emptyFields.push('code')
+  }
+  if(!title){
+      emptyFields.push('title')
+  }
+  if(!description){
+      emptyFields.push('description')
+  }
+  if(!category){
+      emptyFields.push('category')
+  }
+  if(!instructor){
+      emptyFields.push('instructor')
+  }
+  if(!start_date){
+    emptyFields.push('start_date')
+}
+if(!end_date){
+  emptyFields.push('end_date')
+}
+
+  if(emptyFields.length > 0) {
+      return res.status(400).json({error: "Please fill in all the fields.", emptyFields})
+  }
+  console.log(emptyFields)
+  try {
+      const course = await courseModel.create({code, title, description,category,instructor,start_date,end_date,bibliography})
+      res.status(200).json(course)
+  } catch (error) {
+    console.log(error)
+      res.status(400).json({error:error.message})
+  }
+}
 
 
 // Fetch grades for a specific user

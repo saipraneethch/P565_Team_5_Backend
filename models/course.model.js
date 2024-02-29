@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 
-// Define the schema for the Course model
 const courseSchema = new mongoose.Schema({
+    code: {
+        type: String,
+        required: [true, 'Please enter course code'],
+        unique: true
+    },
     title: {
         type: String,
         required: [true, 'Please enter course title'],
@@ -10,26 +14,28 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please enter course description'],
     },
+    category: [{
+        type: String, // Assuming categories are just strings; adjust as necessary
+    }],
     instructor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Reference to the User model
         required: true,
+        ref: 'User'
     },
-    students: [{//array with two values
-        studentId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User', // Reference to the User model
-            required: true,
-        },
-        // grades are key-value pairs
-        course_grades: {
-            type: Map,
-            of: Number, 
-            default: {}, 
-        },
-    }],
+    start_date: {
+        type: Date,
+        required: true
+    },
+    end_date: {
+        type: Date,
+        required: true
+    },
+    bibliography: [{
+        title: String,
+        author: String,
+    }]
 }, { timestamps: true });
 
-const Course = mongoose.model("Course", courseSchema);
+const courseModel = mongoose.model("Course", courseSchema);
 
-export default Course;
+export default courseModel;
