@@ -7,6 +7,8 @@ export default {
       "^(\\.{1,2}/.*)\\.js$": "$1",
     },
     testEnvironment: "node",
-    transformIgnorePatterns: ["<rootDir>/node_modules/"],
+    transformIgnorePatterns: ["<rootDir>/node_modules/"]   
   };
+
+
   
