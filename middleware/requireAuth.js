@@ -23,7 +23,7 @@ export const requireAuth = async (req, res, next) => {
 
     }catch (error) {
         console.log(error)
-        res.status(401).json({error:'Request is not authorised'})
+        res.status(401).json({error:'Request is not authorized'})
     }
 
 
