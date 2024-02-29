@@ -16,14 +16,14 @@ afterAll(async () => {
 });
 
 describe('Course Model Test', () => {
-    // Test for validating successful course creation
+    //test for validating successful course creation
     it('create & save course successfully', async () => {
         const validCourse = new courseModel({
             code: 'CS101',
             title: 'Introduction to Computer Science',
             description: 'A comprehensive overview of computer science principles.',
             category: ['Programming', 'Basics'],
-            instructor: new mongoose.Types.ObjectId(), // Mock ObjectId for instructor
+            instructor: new mongoose.Types.ObjectId(), // mock ObjectId for instructor
             start_date: new Date(),
             end_date: new Date(),
             bibliography: [{ title: 'Introduction to Algorithms', author: 'Thomas H. Cormen' }]
@@ -35,7 +35,7 @@ describe('Course Model Test', () => {
         expect(savedCourse.instructor).toEqual(validCourse.instructor);
     });
 
-    // Test for handling required fields
+    // test for handling required fields
     it('fail to create course without required fields', async () => {
         const courseWithoutRequiredField = new courseModel({ title: 'Only Title' });
         let err;
