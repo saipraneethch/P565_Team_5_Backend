@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+// import { isYieldExpression } from "typescript";
 // const validator = require('validator');
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,6 +54,13 @@ const userSchema = new mongoose.Schema({
     },
     courses: [{
         courseId: String,
+        grade: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+            max: 100,
+        }
     }],
 }, { timestamps: true });
 

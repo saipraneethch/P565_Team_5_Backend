@@ -4,6 +4,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import User from '../models/user.model.js'
 
 import jwt from "jsonwebtoken";
 
@@ -36,7 +37,7 @@ export const registrationUser = CatchAsyncError(async (req, res, next) => {
     if (!first_name.trim() || !last_name.trim() || !username.trim() || !email.trim() || !password.trim()) {
       throw new Error("All fields must be required");
     }
-    
+
 
     if (!validator.isEmail(email)) {
       throw Error("Email is not valid");
@@ -265,8 +266,7 @@ export const updatePasswordCode = async (req, res) => {
     console.log({ activation_token, activation_code });
 
     // Check if activation token is provided
-    if (activation_code === undefined || activation_code.trim() === '')
-     {
+    if (activation_code === undefined || activation_code.trim() === '') {
       throw Error("No activation code provided");
     }
 
@@ -292,14 +292,14 @@ export const updatePasswordCode = async (req, res) => {
 export const updatePasswordReset = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    
+
+
     // Find the user by their email
     const user = await userModel.findOne({ email });
     if (!user) {
       throw Error('User not found with this email');
     }
-    
+
     console.log("User found:", user); // Confirm user is found
 
     user.password = password;
@@ -313,10 +313,10 @@ export const updatePasswordReset = async (req, res) => {
   }
 };
 
-export const handleOAuthLogin = async (req,res) => {
+export const handleOAuthLogin = async (req, res) => {
 
-  const {first_name,last_name,username, email } = req.body;
-  
+  const { first_name, last_name, username, email } = req.body;
+
   const newUser = {
     first_name: first_name,
     last_name: last_name,
@@ -328,13 +328,13 @@ export const handleOAuthLogin = async (req,res) => {
   try {
     let user = await userModel.findOne({ email: email });
     console.log('User found:', user);
-  
+
     if (!user) {
       console.log('Creating new user');
       user = await userModel.create(newUser);
       console.log('New user created:', user);
     }
-  
+
     console.log('User ID for token:', user._id);
     const token = createToken(user._id);
     console.log('Token created:', token);
@@ -342,6 +342,19 @@ export const handleOAuthLogin = async (req,res) => {
   } catch (error) {
     console.error('Error in handleOAuthLogin:', error);
     res.status(400).json({ error: error.message });
+  }
+};
+
+export const getUserCourses = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username }).select('courses');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user.courses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user courses', error: error.message });
   }
 };
 

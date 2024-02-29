@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Define the schema for the Course model
 const courseSchema = new mongoose.Schema({
     courseID:{
         type: String,
