@@ -29,4 +29,5 @@ editUserRouter.post('/verify-admin',verifyAdmin)
 //check if username already exists for updating user details
 editUserRouter.get('/check-username/:username',checkUsername)
 
+
 export default editUserRouter;

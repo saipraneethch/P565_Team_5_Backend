@@ -36,6 +36,17 @@ const courseSchema = new mongoose.Schema({
     }]
 }, { timestamps: true });
 
+
+
+courseSchema.pre("save", async function (next) {
+    
+    if (this.code && this.isModified("code")) {
+      this.code = this.code.toUpperCase();
+    }
+  
+    next();
+  });
+
 const courseModel = mongoose.model("Course", courseSchema);
 
 export default courseModel;

@@ -164,10 +164,4 @@ export const checkUsername = async (req, res) => {
     }
 }
 
-// module.exports = {
-//     getUsers,
-//     getUser,
-//     createUser,
-//     deleteUser,
-//     updateUser
-// }
+
