@@ -13,6 +13,23 @@ export const getCourses = async (req, res) => {
   res.status(200).json(courses);
 }
 
+//get a single course
+export const getCourse = async (req, res) => {
+  const {id} = req.params
+
+  if (!mongoose.Types.ObjectId.isValid(id)){
+      return res.status(404).json({error: 'No such course'})
+  }
+
+  const course = await courseModel.findById(id)
+
+  if (!course) {
+      return res.status(404).json({error: "No such course"})
+  }
+
+  res.status(200).json(course)
+}
+
 export const addCourse = async (req, res) => {
   const { code, title, description, category, instructor, start_date, end_date, bibliography } = req.body;
 
@@ -73,6 +90,23 @@ export const addCourse = async (req, res) => {
   }
 };
 
+//delete a user
+export const deleteCourse = async (req, res) => {
+  const {id} = req.params
+
+  if (!mongoose.Types.ObjectId.isValid(id)){
+      return res.status(404).json({error: 'No such course'})
+  }
+
+  const course = await courseModel.findOneAndDelete({_id: id})
+
+  if (!course) {
+      return res.status(400).json({error: "No such course"})
+  }
+
+  res.status(200).json(course)
+
+}
 
 // get user - instructor only
 export const getInstructors = async (req, res) => {
