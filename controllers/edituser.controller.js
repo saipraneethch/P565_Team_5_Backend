@@ -108,6 +108,72 @@ export const updateUser = async (req, res) => {
 };
 
 
+export const updateUserCourse = async (req,res) => {
+    console.log("Inside controller")
+    const { username } = req.params;
+  const { courseId } = req.body;
+
+//   if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(courseId)) {
+//     return res.status(404).json({ error: "Invalid user or course ID" });
+//   }
+
+  try {
+    
+    // Find user and push the new course to their courses array
+    const user = await userModel.findOneAndUpdate(
+        { username: username },
+        { $addToSet: { courses: { courseId: courseId } } }, // Use $addToSet to avoid duplicates
+        { new: true, runValidators: true }
+      );
+
+    if (!user) {
+      return res.status(404).json({ error: "No such user" });
+    }
+
+    // Respond with updated user data
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+export const checkEnrollment = async (req, res) => {
+    try {
+      const { username, courseId } = req.params;
+      // Lookup the user and check if the courseId is in their enrolled courses
+      const user = await userModel.findOne({ username, 'courses.courseId': courseId });
+      const isEnrolled = !!user;
+      res.status(200).json({ enrolled: isEnrolled });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+
+  export const dropUserCourse = async (req, res) => {
+    const { username } = req.params;
+    const { courseId } = req.body; // Assume the courseId to drop is sent in the request body
+  
+    try {
+      // Update the user document by pulling the course from their courses array
+      const updatedUser = await userModel.findOneAndUpdate(
+        { username: username },
+        { $pull: { courses: { courseId: courseId } } },
+        { new: true } // Return the updated document
+      );
+  
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found or course not dropped" });
+      }
+  
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+  
+  
+
 //verify admin password for updating user
 export const verifyAdmin = async (req, res) => {
     try {

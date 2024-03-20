@@ -59,9 +59,12 @@ const userSchema = new mongoose.Schema(
     },
     courses: [
       {
-        courseId: String,
-      },
-    ],
+        courseId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Course'
+        }
+      }
+    ]
   },
   { timestamps: true }
 );

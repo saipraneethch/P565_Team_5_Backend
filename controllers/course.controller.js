@@ -136,55 +136,31 @@ export const getSingleInstructor = async(req, res) => {
 
 }
 
-// Fetch grades for a specific user
-export const fetchUserGrades = CatchAsyncError(async (req, res, next) => {
+//get enrolled user courses
+export const getEnrolledCourses = async (req, res) => {
+  const { username } = req.params;
+
   try {
-    const { userId } = req.params; // Assuming userId is passed as a route parameter
-    const user = await userModel.findById(userId); // Find the user by ID
-
-    //
-
-    if (!user) {
-      return next(new ErrorHandler("User not found", 404));
+    // Fetch user by username
+    const userWithEnrollments = await userModel.findOne({ username: username });
+    
+    // If no user found, send a 404 response
+    if (!userWithEnrollments) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Fetch grades for the user from the Grade model
-    const grades = await gradeModel.find({ user: userId });
-
-    res.status(200).json({
-      success: true,
-      grades,
+    // Get the IDs of the enrolled courses
+    const enrolledCourseIds = userWithEnrollments.courses.map(c => c.courseId);
+    
+    // Fetch all courses where the _id is in enrolledCourseIds
+    const courses = await courseModel.find({
+      '_id': { $in: enrolledCourseIds }
     });
+
+    // Send the courses in the response
+    res.status(200).json(courses);
   } catch (error) {
-    return next(new ErrorHandler(error.message, 400));
+    // Handle potential errors
+    res.status(500).json({ error: error.message });
   }
-});
-
-// Update grades for a specific user
-export const updateUserGrades = CatchAsyncError(async (req, res, next) => {
-  try {
-    const { userId } = req.params; // assuming userId is passed as a route parameter
-    const { courseId, grade } = req.body;
-
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return next(new ErrorHandler("User not found", 404));
-    }
-
-    // update or create a new grade entry for the user and course
-    const updatedGrade = await gradeModel.findOneAndUpdate(
-      { user: userId, course: courseId },
-      { grade },
-      { upsert: true, new: true }
-    );
-
-    res.status(200).json({
-      success: true,
-      grade: updatedGrade,
-    });
-  } catch (error) {
-    return next(new ErrorHandler(error.message, 400));
-  }
-});
-
-//will add controllers for course title, etc.
+};
