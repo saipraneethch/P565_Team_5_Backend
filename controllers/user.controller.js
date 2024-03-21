@@ -352,3 +352,16 @@ export const handleOAuthLogin = async (req,res) => {
   }
 };
 
+export const getUsersForSidebar = async (req, res) => {
+  try{
+    const loggedInUserId=req.user._id;
+
+    const filteredUsers= await userModel.find({_id:{ $ne: loggedInUserId } }).select("-password");//excludes logged in user
+
+    res.status(200).json(filteredUsers);
+
+  }catch(error){
+    console.log('error in get users for sidebar');
+    res.status(500).json({error: 'Internal server error.' });
+  }
+};

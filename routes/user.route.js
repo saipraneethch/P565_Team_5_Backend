@@ -1,5 +1,6 @@
 import express from 'express';
-import { registrationUser, activateUser, loginUser,updatePasswordEmail ,updatePasswordCode, updatePasswordReset, handleOAuthLogin} from '../controllers/user.controller.js';
+import { getUsersForSidebar, registrationUser, activateUser, loginUser,updatePasswordEmail ,updatePasswordCode, updatePasswordReset, handleOAuthLogin} from '../controllers/user.controller.js';
+import requireAuth from '../middleware/requireAuth.js';
 
 const userRouter = express.Router();
 
@@ -10,5 +11,9 @@ userRouter.post('/update-password-email', updatePasswordEmail)
 userRouter.post('/update-password-code',updatePasswordCode)
 userRouter.post('/update-password-reset',updatePasswordReset)
 userRouter.post('/oauth',handleOAuthLogin)
+
+
+userRouter.get('/sidebar-users', requireAuth, getUsersForSidebar)
+
 
 export default userRouter;
