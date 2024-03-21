@@ -33,7 +33,12 @@ const courseSchema = new mongoose.Schema({
     bibliography: [{
         title: String,
         author: String,
-    }]
+    }],
+    assignments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Assignment'
+      }]
+      
 }, { timestamps: true });
 
 

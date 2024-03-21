@@ -1,5 +1,5 @@
 import express from 'express';
-import {addCourse,getCourses,getInstructors, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses} from '../controllers/course.controller.js';
+import {addCourse,getCourses,getAllInstructors, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses,getInstructorCourses} from '../controllers/course.controller.js';
 
 const courseRouter = express.Router();
 
@@ -10,10 +10,12 @@ courseRouter.get('/:id',getCourse)
 courseRouter.delete('/:id',deleteCourse)
 
 //get all instructors
-courseRouter.get('/get-instructors',getInstructors)
+courseRouter.get('/get-instructors',getAllInstructors)
 
 courseRouter.get('/get-single-instructor/:id',getSingleInstructor)
 
 courseRouter.get('/get-user-courses/:username',getEnrolledCourses)
+
+courseRouter.get('/get-instructor-courses/:id',getInstructorCourses)
 
 export default courseRouter;

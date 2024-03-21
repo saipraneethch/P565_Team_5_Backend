@@ -159,7 +159,7 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
 
     const token = createToken(user._id);
 
-    res.status(200).json({ username, role:user.role, token });
+    res.status(200).json({ username, role:user.role,_id:user._id, token });
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
@@ -174,7 +174,7 @@ export const loginUser = async (req, res) => {
     const token = createToken(user._id);
     
 
-    res.status(200).json({ username, role:user.role, token });
+    res.status(200).json({ username, role:user.role,_id:user._id, token });
 
     // Destructure the user object to exclude the password when sending it back
     // const { password: userPassword, ...userWithoutPassword } = user.toObject();
@@ -345,7 +345,7 @@ export const handleOAuthLogin = async (req,res) => {
     console.log('User ID for token:', user._id);
     const token = createToken(user._id);
     console.log('Token created:', token);
-    res.status(200).json({ username, role:user.role, token });
+    res.status(200).json({ username, role:user.role, _id:user._id,token });
   } catch (error) {
     console.error('Error in handleOAuthLogin:', error);
     res.status(400).json({ error: error.message });

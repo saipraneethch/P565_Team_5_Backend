@@ -109,7 +109,8 @@ export const deleteCourse = async (req, res) => {
 }
 
 // get user - instructor only
-export const getInstructors = async (req, res) => {
+export const getAllInstructors = async (req, res) => {
+  
   
   try {
       const instructors = await userModel.find({ role: "instructor" }).sort({ first_name: 1, last_name: 1 });
@@ -161,6 +162,17 @@ export const getEnrolledCourses = async (req, res) => {
     res.status(200).json(courses);
   } catch (error) {
     // Handle potential errors
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getInstructorCourses = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const courses = await courseModel.find({ instructor: id }); // Ensure that the model name is correct and follows your naming conventions
+    res.json(courses);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
