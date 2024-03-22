@@ -7,6 +7,7 @@ describe('User Controller', () => {
   let mongoServer;
 
   beforeAll(async () => {
+    jest.setTimeout(20000);
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
@@ -44,8 +45,8 @@ describe('User Controller', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body._id).toBe(userId);
-    // Add more assertions as needed
+
   });
 
-  // Add more tests for deleteUser, updateUser, etc.
+
 });

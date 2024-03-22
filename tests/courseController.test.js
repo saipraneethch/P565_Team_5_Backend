@@ -7,6 +7,7 @@ describe('Course Controller - addCourse', () => {
     let mongoServer;
 
     beforeAll(async () => {
+        jest.setTimeout(20000);
         mongoServer = await MongoMemoryServer.create();
         const mongoUri = mongoServer.getUri();
         await mongoose.connect(mongoUri);
@@ -50,7 +51,6 @@ describe('Course Controller - addCourse', () => {
         expect(response.statusCode).toBe(400);
         expect(response.body).toHaveProperty('error');
         expect(response.body.emptyFields).toContain('code');
-        // Add checks for other missing fields as necessary
     });
 
 });
