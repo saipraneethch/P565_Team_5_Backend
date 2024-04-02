@@ -18,6 +18,7 @@ editUserRouter.get('/',getUsers)
 editUserRouter.get('/:id',getUser)
 editUserRouter.get('/:username',getUserByUsername)
 
+
 //DELETE a user
 editUserRouter.delete('/:id',deleteUser)
 

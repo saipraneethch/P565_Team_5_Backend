@@ -12,8 +12,6 @@ userRouter.post('/update-password-code',updatePasswordCode)
 userRouter.post('/update-password-reset',updatePasswordReset)
 userRouter.post('/oauth',handleOAuthLogin)
 
-
-userRouter.get('/sidebar-users', requireAuth, getUsersForSidebar)
-
+userRouter.get('/sidebar-users/:user_token', requireAuth, getUsersForSidebar)
 
 export default userRouter;

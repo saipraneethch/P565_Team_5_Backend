@@ -354,7 +354,13 @@ export const handleOAuthLogin = async (req,res) => {
 
 export const getUsersForSidebar = async (req, res) => {
   try{
+    const {user_token} =req.params; 
+
+    // const {user_token}=req.user.token;
+
     const loggedInUserId=req.user._id;
+
+    // console.log("token",user_token);
 
     const filteredUsers= await userModel.find({_id:{ $ne: loggedInUserId } }).select("-password");//excludes logged in user
 
