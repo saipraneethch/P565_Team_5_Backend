@@ -176,3 +176,16 @@ export const getInstructorCourses = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+export const getEnrolledStudents = async (req, res) => {
+  const { id } = req.params; // Make sure that 'id' is the course ID passed in the request
+  try {
+    // Assuming the 'courses.courseId' contains the ID of the course
+    const students = await userModel.find({ 'courses.courseId': id }).populate('courses.courseId');
+    // You may need to adjust the populate method to match your Course model's naming convention
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
