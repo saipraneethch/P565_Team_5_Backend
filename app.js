@@ -9,6 +9,12 @@ import courseRouter from "./routes/course.route.js";
 import messageRouter from "./routes/message.route.js";
 import assignmentRouter from "./routes/assignment.route.js";
 
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Configure environment variables
 config();
 
@@ -19,6 +25,10 @@ app.use(express.json({ limit: "50mb" }));
 
 // Cookie parser, middleware
 app.use(cookieParser());
+
+// Serve static files from the 'assignmentUploads' directory
+app.use('/assignmentUploads', express.static(path.join(__dirname, 'assignmentUploads')));
+
 
 // CORS for resource sharing
 app.use(

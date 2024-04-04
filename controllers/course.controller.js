@@ -1,6 +1,7 @@
 import express from "express";
 import userModel from "../models/user.model.js";
-import courseModel from "../models/course.model.js"; // Import the Grade model
+import courseModel from "../models/course.model.js"; 
+import moduleModel from "../models/modules.model.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
 import mongoose from "mongoose";
@@ -189,3 +190,54 @@ export const getEnrolledStudents = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+
+export const uploadContent = async (req, res) => {
+  console.log(req.body);
+  const {title, course, fileUrl, fileType} =req.body;
+  try {
+    
+    const module = await moduleModel.create({
+      title,
+      course,
+      fileUrl,
+      fileType
+    });
+
+    res.status(200).json(module);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+export const displayContent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    
+    const modules = await moduleModel.find({ course: id }).populate('course');
+    res.json(modules);
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteContent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await moduleModel.findByIdAndDelete(id);
+    
+    if (!result) {
+      return res.status(404).json({ message: "Module not found" });
+    }
+    // Send back a success response
+    res.json({ message: "Module deleted successfully" });
+  } catch (error) {
+    // If an error occurs, log it and send back a 500 status with the error message
+    console.error("Error deleting module:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+

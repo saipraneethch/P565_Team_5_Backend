@@ -23,7 +23,7 @@ export const getAssignments = async (req, res) => {
             course: course_id,
             instructor: instructor_id
         });
-        console.log(assignments)
+        
         // If no assignments found, return a 404 response
         if (assignments.length === 0) {
             return res.status(404).json({ message: "No assignments found for the provided IDs." });
@@ -40,25 +40,71 @@ export const getAssignments = async (req, res) => {
 
 
 export const addAssignment = async (req, res) => {
-    // Get data from request body
+    // req.body contains the text fields
     const { title, description, startDate, dueDate, course, instructor } = req.body;
+    // req.file contains information about the file
+    let fileUrl;
+    // Check if a file is uploaded and construct the file URL
+    if (req.file) {
+        fileUrl = `${req.protocol}://${req.get('host')}/assignmentUploads/${req.file.filename}`;
+        // fileUrl = `http://localhost:8000/assignmentUploads/${req.file.filename}`;
+        
+
+    }
 
     try {
-        // Directly create and save the new assignment to the database
+        // Create and save the new assignment to the database, including the file URL if available
         const newAssignment = await assignmentModel.create({
             title,
             description,
             startDate,
             dueDate,
             course,
-            instructor
+            instructor,
+            ...(fileUrl && { fileUrl }) // Spread operator to conditionally add fileUrl property
         });
 
-        // Send back the newly created assignment as a response
         res.status(201).json(newAssignment);
     } catch (error) {
-        // If an error occurs, send an error response
         console.error('Error creating new assignment:', error);
-        res.status(500).json({ message: 'Error creating new assignment', error: error });
+        res.status(500).json({ message: 'Error creating new assignment', error });
     }
 };
+
+export const deleteAssignment = async(req, res) => {
+    try {
+        const { id } = req.params;
+    
+        const result = await assignmentModel.findByIdAndDelete(id);
+        
+        if (!result) {
+          return res.status(404).json({ message: "Assignment not found" });
+        }
+        // Send back a success response
+        res.json({ message: "Assignment deleted successfully" });
+      } catch (error) {
+        // If an error occurs, log it and send back a 500 status with the error message
+        console.error("Error deleting assignment:", error);
+        res.status(500).json({ error: error.message });
+      }
+
+}
+
+export const updateAssignment = async(req, res) => {
+    try {
+        console.log("Inside updateAssignment")
+        const { id } = req.params;
+        const updateValues = req.body; // For text updates only. If handling files, this needs adjustment.
+    
+        const result = await assignmentModel.findByIdAndUpdate(id, updateValues, { new: true });
+        
+        if (!result) {
+          return res.status(404).json({ message: "Assignment not found" });
+        }
+        res.json({ message: "Assignment updated successfully", assignment: result });
+    } catch (error) {
+        console.error("Error updating assignment:", error);
+        res.status(500).json({ error: error.message });
+    }
+}
+
