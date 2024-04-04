@@ -9,6 +9,10 @@ const assignmentSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please enter assignment description'],
   },
+  fileUrl: {
+    type: String, 
+    required: false, // Make this optional as not all assignments may have a file
+  },
   startDate: {
     type: Date,
     required: [true, 'Please enter start date for assignment'],
