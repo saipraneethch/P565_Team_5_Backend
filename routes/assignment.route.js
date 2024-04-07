@@ -22,6 +22,6 @@ const upload = multer({ storage: storage });
 assignmentRouter.post('/add-assignment', upload.single('file'), addAssignment);
 assignmentRouter.get('/:course_id/:instructor_id', getAssignments);
 assignmentRouter.delete('/:id', deleteAssignment);
-assignmentRouter.put('/:id', updateAssignment);
+assignmentRouter.patch('/:id', upload.single('file'),updateAssignment);
 
 export default assignmentRouter;

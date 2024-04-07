@@ -92,14 +92,22 @@ export const deleteAssignment = async(req, res) => {
 
 export const updateAssignment = async(req, res) => {
     try {
-        console.log("Inside updateAssignment")
+        console.log("Inside updateAssignment");
         const { id } = req.params;
-        const updateValues = req.body; // For text updates only. If handling files, this needs adjustment.
-    
-        const result = await assignmentModel.findByIdAndUpdate(id, updateValues, { new: true });
         
+        // Combine text fields and file information (if a file was uploaded)
+        const updateValues = { ...req.body };
+        console.log(updateValues)
+        if (req.file) {
+            updateValues.assignmentFile = req.file.path; // Include file path in the update object
+        }
+
+        // Validate updateValues here as necessary
+
+        const result = await assignmentModel.findByIdAndUpdate(id, updateValues, { new: true });
+
         if (!result) {
-          return res.status(404).json({ message: "Assignment not found" });
+            return res.status(404).json({ message: "Assignment not found" });
         }
         res.json({ message: "Assignment updated successfully", assignment: result });
     } catch (error) {
