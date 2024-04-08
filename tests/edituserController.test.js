@@ -16,7 +16,7 @@ describe('User Controller', () => {
     await mongoose.disconnect();
     await mongoServer.stop();
   });
-
+https://occ-0-856-1722.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABTHXMvW5ViJR3ZnVVvJVT2-CfMw-0X9_xc73NKPAlqQPOMIhlIItk5mnxlaTJZYuV4u7JBXjdv0KIzvKsthTbDtA-Ub8qTZzOxeh.webp?r=660
   test('POST /users - Create a new user', async () => {
     const userData = {
       first_name: 'Test',
@@ -44,8 +44,5 @@ describe('User Controller', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body._id).toBe(userId);
-    // Add more assertions as needed
   });
-
-  // Add more tests for deleteUser, updateUser, etc.
 });

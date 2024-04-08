@@ -50,7 +50,6 @@ describe('Course Controller - addCourse', () => {
         expect(response.statusCode).toBe(400);
         expect(response.body).toHaveProperty('error');
         expect(response.body.emptyFields).toContain('code');
-        // Add checks for other missing fields as necessary
     });
 
 });
