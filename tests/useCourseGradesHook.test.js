@@ -11,6 +11,13 @@ describe('useCourseGrades', () => {
     fetchMock.resetMocks();
   });
 
+  it('handles fetch error', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useCourseGrades());
+    
+    await waitForNextUpdate();
+    expect(result.current.error).toBeDefined();
+  });
+
   it('initial state', () => {
     const { result } = renderHook(() => useCourseGrades());
 
