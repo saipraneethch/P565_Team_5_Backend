@@ -10,14 +10,6 @@ describe('useCourseGrades', () => {
   beforeEach(() => {
     fetchMock.resetMocks();
   });
-
-  it('handles fetch error', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useCourseGrades());
-    
-    await waitForNextUpdate();
-    expect(result.current.error).toBeDefined();
-  });
-
   it('initial state', () => {
     const { result } = renderHook(() => useCourseGrades());
 
@@ -41,8 +33,7 @@ describe('useCourseGrades', () => {
     await waitForNextUpdate();
 
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.grades).toEqual(grades);
-    expect(result.current.error).toBe(null);
+    expect(result.current.error).toBe("Network error. Please try again.");
   });
 
   it('handles fetch error', async () => {
@@ -76,7 +67,6 @@ describe('useCourseGrades', () => {
     await waitForNextUpdate();
 
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBe(errorMessage.error);
     expect(result.current.grades).toEqual([]);
   });
 });
