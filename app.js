@@ -53,6 +53,11 @@ app.get("/test", (req, res, next) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.status(200).json({ success: true, message: "Backend API is running" });
+});
+
+
 // Unknown routes
 app.all("*", (req, res, next) => {
   const err = new Error(`Route ${req.originalUrl} not found`);
