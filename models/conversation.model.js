@@ -14,6 +14,10 @@ const conversationSchema = new mongoose.Schema({
             default: [],
         },
     ],
+    groupChat: {//use this to decide which chats to render, where will i set it?
+        type: Boolean,
+        default: false,
+    }
 
 }, { timestamps: true });
 

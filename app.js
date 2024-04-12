@@ -7,6 +7,7 @@ import userRouter from "./routes/user.route.js";
 import editUserRouter from "./routes/edituser.route.js";
 import courseRouter from "./routes/course.route.js";
 import messageRouter from "./routes/message.route.js";
+import groupMessageRouter from "./routes/groupmessage.route.js";
 import assignmentRouter from "./routes/assignment.route.js";
 
 import { fileURLToPath } from 'url';
@@ -42,6 +43,7 @@ app.use("/api/v1", userRouter); //this is the user api endpoint
 app.use("/api/v1/userdetails", editUserRouter);//route, reference to route imported above
 app.use("/api/v1/coursedetails", courseRouter);
 app.use("/api/v1/messages", messageRouter);
+app.use("/api/v1/groupmessages", groupMessageRouter);
 app.use("/api/v1/assignments",assignmentRouter)
 
 

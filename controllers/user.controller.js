@@ -362,7 +362,7 @@ export const getUsersForSidebar = async (req, res) => {
 
     // console.log("token",user_token);
 
-    const filteredUsers= await userModel.find({_id:{ $ne: loggedInUserId } }).select("-password");//excludes logged in user
+    const filteredUsers = await userModel.find({_id:{ $ne: loggedInUserId } }).select("-password");//excludes logged in user
 
     res.status(200).json(filteredUsers);
 

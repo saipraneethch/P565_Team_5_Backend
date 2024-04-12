@@ -14,4 +14,6 @@ userRouter.post('/oauth',handleOAuthLogin)
 
 userRouter.get('/sidebar-users/:user_token', requireAuth, getUsersForSidebar)
 
+
+
 export default userRouter;

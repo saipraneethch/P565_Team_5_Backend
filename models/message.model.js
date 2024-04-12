@@ -7,17 +7,20 @@ const messageSchema = new mongoose.Schema({
         required: true
 
     },
-    receiverId: {
+    receiverId: {//for direct messages
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
     },
-    message:{
+    recipients: [{//for group chats
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
+    message: {
         type: String,
         required: true
-},
-//createdAt, updatedAt fields added by mongoose
-},{timestamps: true});
+    },
+    //createdAt, updatedAt fields added by mongoose
+}, { timestamps: true });
 
 const Message = mongoose.model('Message', messageSchema);
 
