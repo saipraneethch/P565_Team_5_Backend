@@ -44,7 +44,6 @@ const assignmentSchema = new mongoose.Schema({
     submissionType: {
       type: String,
       required: true,
-      enum: ['file', 'text', 'url', 'media'], // Ensure that only these four submission types are allowed
     },
     submissionContent: {
       type: String,

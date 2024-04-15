@@ -22,7 +22,7 @@ export const getAssignments = async (req, res) => {
         const assignments = await assignmentModel.find({
             course: course_id,
             instructor: instructor_id
-        });
+        }).sort({dueDate:1});
         
         // If no assignments found, return a 404 response
         if (assignments.length === 0) {
@@ -116,3 +116,73 @@ export const updateAssignment = async(req, res) => {
     }
 }
 
+export const submitAssignment = async(req, res) => {
+    try {
+        // Extract data from request body
+        const { assignment_id, user, fileUrl, fileType } = req.body;
+        console.log(req.body)
+    
+        // Find the assignment by ID
+        const assignment = await assignmentModel.findById(assignment_id.assignment_id);
+        console.log("assignment",assignment)
+    
+        if (!assignment) {
+          return res.status(404).json({ error: 'Assignment not found' });
+        }
+    
+        // Create submission object
+        const submission = {
+          student: user,
+          submissionType: fileType,
+          submissionContent: fileUrl // Assuming fileUrl is the content of the submission
+        };
+    
+        // Delete existing submissions for the same assignment and user
+        await assignmentModel.updateOne(
+            { _id: assignment_id.assignment_id, 'submissions.student': user },
+            { $pull: { submissions: { student: user } } }
+        );
+        // Add the submission to the assignment's submissions array
+        assignment.submissions.push(submission);
+    
+        // Save the updated assignment
+        await assignment.save();
+    
+        // Respond with success message
+        res.status(200).json({ message: 'Assignment submitted successfully' });
+      } catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+
+}
+
+export const getSubmittedFiles = async (req, res) => {
+    try {
+        const { assignment_id, user_id } = req.params;
+        
+        // Find the assignment based on assignment_id and student user_id
+        const assignment = await assignmentModel.findOne({
+            _id: assignment_id,
+            'submissions.student': user_id
+        });
+
+        if (!assignment) {
+            return res.status(404).json({ error: 'Assignment not found' });
+        }
+
+        // Extract submitted files from the assignment
+        const submittedFiles = assignment.submissions
+            .filter(submission => submission.student.toString() === user_id)
+            .map(submission => ({
+                submissionContent: submission.submissionContent, 
+                submittedOn: submission.submittedOn 
+            }));
+
+        res.status(200).json({ submittedFiles });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

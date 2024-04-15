@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { getAssignments, addAssignment, deleteAssignment , updateAssignment} from '../controllers/assignment.contoller.js';
+import { getAssignments, addAssignment, deleteAssignment , updateAssignment, submitAssignment, getSubmittedFiles} from '../controllers/assignment.contoller.js';
 
 const assignmentRouter = express.Router();
 
@@ -23,5 +23,9 @@ assignmentRouter.post('/add-assignment', upload.single('file'), addAssignment);
 assignmentRouter.get('/:course_id/:instructor_id', getAssignments);
 assignmentRouter.delete('/:id', deleteAssignment);
 assignmentRouter.patch('/:id', upload.single('file'),updateAssignment);
+
+assignmentRouter.post('/submit-assignment', submitAssignment);
+assignmentRouter.get('/get-submitted-files/:assignment_id/:user_id', getSubmittedFiles);
+
 
 export default assignmentRouter;
