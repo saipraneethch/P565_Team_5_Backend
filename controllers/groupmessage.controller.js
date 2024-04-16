@@ -3,6 +3,7 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+// import { idText } from "typescript";
 
 export const sendMessage = async (req, res) => {
     // console.log("message sent", req.params.id)
@@ -83,13 +84,36 @@ export const getGroupConversations = async (req, res) => {
             // participants: senderId,
         }).populate("participants");
 
-        if (!conversations) {
-            return res.status(200).json([]);
-        }
+        // .populate("participants")
+        return res.status(200).json(conversations);
+
 
     } catch (error) {
         console.log("error in sent message controller", error.message);
         res.status(500).json({ error: "Internal server error" });
     };
 };
+
+//todo
+export const createGroupChat = async (req, res) => {
+    try {
+        // Extract the participants from the request body
+        const { participants: givenParticipants } = req.body;
+
+
+        // Create the group chat in the database
+        const groupChat = await Conversation.create({
+            participants: [...givenParticipants],
+            //add group chat true?
+            //default empty messages array
+        });
+
+        // Return the created group chat as a response
+        res.status(201).json(groupChat);
+    } catch (error) {
+        console.error('Error creating group chat:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 

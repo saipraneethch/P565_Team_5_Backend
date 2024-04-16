@@ -1,7 +1,7 @@
 import express from "express";
 
 //imnporting workoutController
-import { getUsers,getUser,deleteUser,updateUser, verifyAdmin, checkUsername, updateUserCourse, checkEnrollment, dropUserCourse, getUserByUsername } from "../controllers/edituser.controller.js";
+import {getUsers,getUser,deleteUser,updateUser, verifyAdmin, checkUsername, updateUserCourse, checkEnrollment, dropUserCourse, getUserByUsername } from "../controllers/edituser.controller.js";
 
 import { requireAuth } from "../middleware/requireAuth.js";
 //creates an instance of the router
@@ -15,8 +15,8 @@ const editUserRouter = express.Router()
 editUserRouter.get('/',getUsers)
 
 //GET a single a user
-editUserRouter.get('/:id',getUser)
-editUserRouter.get('/:username',getUserByUsername)
+// editUserRouter.get('/:id',getUser)
+editUserRouter.get('/username/:username', getUserByUsername)
 
 
 //DELETE a user
