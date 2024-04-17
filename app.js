@@ -7,6 +7,7 @@ import userRouter from "./routes/user.route.js";
 import editUserRouter from "./routes/edituser.route.js";
 import courseRouter from "./routes/course.route.js";
 import messageRouter from "./routes/message.route.js";
+import conversationRouter from "./routes/conversation.route.js";
 import assignmentRouter from "./routes/assignment.route.js";
 import announcementsRouter from "./routes/announcements.route.js";
 
@@ -45,6 +46,7 @@ app.use("/api/v1/coursedetails", courseRouter);
 app.use("/api/v1/messages", messageRouter);
 app.use("/api/v1/assignments",assignmentRouter);
 app.use("/api/v1/announcements",announcementsRouter);
+app.use("/api/v1/conversations",conversationRouter);
 
 // Testing API
 app.get("/test", (req, res, next) => {
