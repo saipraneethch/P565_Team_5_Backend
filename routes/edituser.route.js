@@ -1,7 +1,7 @@
 import express from "express";
 
 //imnporting workoutController
-import { getUsers,getUser,deleteUser,updateUser, verifyAdmin, checkUsername, updateUserCourse, checkEnrollment, dropUserCourse, getUserByUsername } from "../controllers/edituser.controller.js";
+import { getUsers, getUser, deleteUser, updateUser, verifyAdmin, checkUsername, updateUserCourse, checkEnrollment, dropUserCourse, getUserByUsername } from "../controllers/edituser.controller.js";
 
 import { requireAuth } from "../middleware/requireAuth.js";
 //creates an instance of the router
@@ -12,30 +12,30 @@ const editUserRouter = express.Router()
 //editUserRouter.use(requireAuth)
 
 
-editUserRouter.get('/',getUsers)
+editUserRouter.get('/', getUsers)
 
 //GET a single a user
-editUserRouter.get('/:id',getUser)
-editUserRouter.get('username/:username',getUserByUsername)
+editUserRouter.get('/:id', getUser)
+editUserRouter.get('/username/:username', getUserByUsername)
 
 
 //DELETE a user
-editUserRouter.delete('/:id',deleteUser)
+editUserRouter.delete('/:id', deleteUser)
 
 //UPDATE a user
-editUserRouter.patch('/:id',updateUser)
+editUserRouter.patch('/:id', updateUser)
 
 //UPDATE a user
-editUserRouter.patch('/:username/enroll',updateUserCourse)
+editUserRouter.patch('/:username/enroll', updateUserCourse)
 
 //check if user is enrolled
 editUserRouter.get('/check-enrollment/:username/:courseId', checkEnrollment);
 
 //verify admin [password for updating user details
-editUserRouter.post('/verify-admin',verifyAdmin)
+editUserRouter.post('/verify-admin', verifyAdmin)
 
 //check if username already exists for updating user details
-editUserRouter.get('/check-username/:username',checkUsername)
+editUserRouter.get('/check-username/:username', checkUsername)
 
 // PUT request to drop a course for a user
 editUserRouter.put('/:username/drop-course', dropUserCourse);
