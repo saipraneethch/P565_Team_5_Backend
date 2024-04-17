@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema(
         courseId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Course'
+        },
+        grades: {
+          type: String, 
+          default: null // Default value for grade is null
         }
       }
     ]
