@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
-import { getAssignments, addAssignment, deleteAssignment , updateAssignment, submitAssignment, getSubmittedFiles, fetchAllStudents,getStudentSubmittedAssignment, submitFeedbackGrade} from '../controllers/assignment.contoller.js';
+import { getAssignments, addAssignment, deleteAssignment , updateAssignment, submitAssignment, getSubmittedFiles, fetchAllStudents,getStudentSubmittedAssignment, submitFeedbackGrade, getStudentAssignments} from '../controllers/assignment.contoller.js';
+
 
 const assignmentRouter = express.Router();
 
@@ -20,6 +21,7 @@ const upload = multer({ storage: storage });
 
 // Modify the addAssignment route to use multer middleware for 'file' field
 assignmentRouter.post('/add-assignment', upload.single('file'), addAssignment);
+assignmentRouter.get('/getCourses/now/:student_id',getStudentAssignments);
 assignmentRouter.get('/:course_id/:instructor_id', getAssignments);
 assignmentRouter.delete('/:id', deleteAssignment);
 assignmentRouter.patch('/:id', upload.single('file'),updateAssignment);
