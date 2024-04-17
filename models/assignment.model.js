@@ -37,24 +37,24 @@ const assignmentSchema = new mongoose.Schema({
       ref: 'User',
       required: true
     },
-    submittedOn: {
+    submittedOn: [{
       type: Date,
       default: Date.now,
-    },
+    }],
     submissionType: {
       type: String,
       required: true,
     },
-    submissionContent: {
+    submissionContent: [{
       type: String,
       required: true // The actual content: could be file path, text, URL, or media link
-    },
+    }],
     grade: {
       type: Number,
     },
-    feedback: {
+    feedback: [{
       type: String,
-    },
+    }],
   }],
   
 }, { timestamps: true });
