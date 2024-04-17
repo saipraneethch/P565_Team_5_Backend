@@ -373,3 +373,42 @@ export const submitFeedbackGrade = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 };
+
+export const getStudentAssignments = async (req, res) => {
+    const { student_id } = req.params;
+    if (!student_id) {
+        return res.status(404).json({ message: "Student not found." });
+    }
+    //console.log(student_id)
+    try {
+        if (!mongoose.isValidObjectId(student_id)) {
+            return res.status(400).json({ message: "Invalid student ID." });
+        }
+
+        // First, fetch the student to get their enrolled courses
+        const student = await userModel.findById(student_id).populate({
+            path: 'courses.courseId', // Ensure this matches your user model's course reference structure
+            populate: { path: 'assignments' } // Populate the assignments of each course
+        });
+        console.log(JSON.stringify(student.courses, null, 2));
+
+
+        // Extract assignments from each course
+        const assignments = student.courses.reduce((acc, courseEntry) => {
+            const courseAssignments = courseEntry.courseId.assignments.map(assignment => ({
+                ...assignment._doc,
+                courseName: courseEntry.courseId.title // Adding course title to each assignment for clarity
+            }));
+            return acc.concat(courseAssignments);
+        }, []);
+
+        if (assignments.length === 0) {
+            return "There are no assignments!";
+        }
+
+        res.status(200).json({ data: assignments });
+    } catch (error) {
+        console.error("Failed to fetch assignments:", error);
+        res.status(500).json({ message: "An error occurred while fetching assignments.", error: error.toString() });
+    }
+};
