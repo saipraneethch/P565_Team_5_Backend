@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema(
           ref: 'Course'
         },
         grades: {
-          type: String, 
+          type: Number, 
           default: null // Default value for grade is null
         }
       }
