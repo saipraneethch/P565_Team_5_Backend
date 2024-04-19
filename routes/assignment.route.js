@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { getAssignments, addAssignment, deleteAssignment , updateAssignment, submitAssignment, getSubmittedFiles, fetchAllStudents,getStudentSubmittedAssignment, submitFeedbackGrade, getAssignmentGrades, submitUserFeedback} from '../controllers/assignment.contoller.js';
+import { getAssignments, addAssignment, deleteAssignment , updateAssignment, submitAssignment, getSubmittedFiles, fetchAllStudents,getStudentSubmittedAssignment, submitFeedbackGrade, getAssignmentGrades, submitUserFeedback, getStudentDetails} from '../controllers/assignment.contoller.js';
 
 const assignmentRouter = express.Router();
 
@@ -34,6 +34,8 @@ assignmentRouter.post('/submit-user-feedback', submitUserFeedback);
 
 
 assignmentRouter.post('/get-assignment-grades', getAssignmentGrades);
+
+assignmentRouter.get('/student-details/:course_id/:student_id', getStudentDetails);
 
 
 export default assignmentRouter;

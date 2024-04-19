@@ -532,3 +532,38 @@ export const submitUserFeedback = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+export const getStudentDetails = async (req, res) => {
+  const { course_id, student_id } = req.params;
+
+  try {
+    // Fetch all assignments for the given courseId
+    const assignments = await assignmentModel
+      .find({ course: course_id })
+      .populate({
+        path: "submissions.student",
+        match: { _id: student_id }, // Ensure only submissions by the given user are populated
+      });
+
+    if (!assignments || assignments.length === 0) {
+      console.log("No assignments found for this course.");
+      return res.status(404).json({ message: "No assignments found for this course." });
+    }
+
+    const user = await userModel.findById(student_id);
+    if (!user) {
+      console.error("User not found");
+      return res.status(404).json({ message: "User not found." });
+    }
+    const course = user.courses.find(course => course.courseId.toString() === course_id);
+
+    console.log(assignments[0].submissions)
+
+
+    return res.status(200).json({ student_grade: course.grades, data: { assignments } });
+  } catch (error) {
+    console.error("Failed to fetch student details:", error);
+    return res.status(500).json({ message: "Failed to fetch student details." });
+  }
+};
