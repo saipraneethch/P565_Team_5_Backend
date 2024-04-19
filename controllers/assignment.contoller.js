@@ -437,8 +437,11 @@ export const submitFeedbackGrade = async (req, res) => {
     // Update student's grade and feedback
     student.grade = grade;
 
-    if (feedback !== "") {
-      student.feedback.push(feedback);
+    // Append username to feedback
+    const updatedFeedback = feedback + " - " + " Prof.";
+
+    if (updatedFeedback.trim() !== "") {
+      student.feedback.push(updatedFeedback);
     }
 
     // Save the assignment
@@ -461,13 +464,12 @@ export const submitFeedbackGrade = async (req, res) => {
 export const getAssignmentGrades = async (req, res) => {
   try {
     const { course_id, user_id } = req.body;
-    console.log(req.body);
     
     const assignments = await assignmentModel.find({
       course: course_id,
       "submissions.student": user_id
     });
-    
+
     // If assignments are found, send them in the response
     if (assignments) {
       res.status(200).json(assignments);
@@ -482,3 +484,51 @@ export const getAssignmentGrades = async (req, res) => {
   }
 };
 
+export const submitUserFeedback = async (req, res) => {
+  const { user_id, username, assignment_id, feedback } = req.body;
+
+  try {
+    // Validate input data
+    if (!user_id || !assignment_id) {
+      return res
+        .status(400)
+        .json({ error: "Student ID and Assignment ID are required" });
+    }
+
+    // Find the assignment by ID
+    const assignment = await assignmentModel.findOne({ _id: assignment_id });
+
+    if (!assignment) {
+      return res.status(404).json({ error: "Assignment not found" });
+    }
+
+    // Find the student in the assignment
+    const student = assignment.submissions.find(
+      (submission) => submission.student.toString() === user_id
+    );
+
+    if (!student) {
+      return res
+        .status(404)
+        .json({ error: "Student not found in the assignment" });
+    }
+
+    // Append username to feedback
+    const updatedFeedback = feedback + " - " + username + " (student)";
+
+    if (updatedFeedback.trim() !== "") {
+      student.feedback.push(updatedFeedback);
+    }
+
+    // Save the assignment
+    await assignment.save();
+
+    // Return success response
+    return res
+      .status(200)
+      .json({ message: "Feedback submitted successfully" });
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
