@@ -379,7 +379,6 @@ export const getStudentAssignments = async (req, res) => {
     if (!student_id) {
         return res.status(404).json({ message: "Student not found." });
     }
-    //console.log(student_id)
     try {
         if (!mongoose.isValidObjectId(student_id)) {
             return res.status(400).json({ message: "Invalid student ID." });
@@ -387,23 +386,25 @@ export const getStudentAssignments = async (req, res) => {
 
         // First, fetch the student to get their enrolled courses
         const student = await userModel.findById(student_id).populate({
+            
             path: 'courses.courseId', // Ensure this matches your user model's course reference structure
             populate: { path: 'assignments' } // Populate the assignments of each course
         });
-        console.log(JSON.stringify(student.courses, null, 2));
+        // console.log(JSON.stringify(student.courses, null, 2));
 
-
-        // Extract assignments from each course
+        console.log(student.courses)
         const assignments = student.courses.reduce((acc, courseEntry) => {
             const courseAssignments = courseEntry.courseId.assignments.map(assignment => ({
                 ...assignment._doc,
                 courseName: courseEntry.courseId.title // Adding course title to each assignment for clarity
             }));
+            
             return acc.concat(courseAssignments);
         }, []);
-
         if (assignments.length === 0) {
-            return "There are no assignments!";
+          return res
+          .status(404)
+          .json({ message: "No assignments found for the provided IDs." });
         }
 
         res.status(200).json({ data: assignments });
