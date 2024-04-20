@@ -241,3 +241,39 @@ export const deleteContent = async (req, res) => {
   }
 };
 
+export const getCourseGrades = async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // Fetch user by username
+    const userWithEnrollments = await userModel.findOne({ username: username });
+    
+    // If no user found, send a 404 response
+    if (!userWithEnrollments) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get the IDs of the enrolled courses
+    const enrolledCourseIds = userWithEnrollments.courses.map(c => c.courseId);
+    
+    // Fetch all courses where the _id is in enrolledCourseIds
+    const courses = await courseModel.find({
+      '_id': { $in: enrolledCourseIds }
+    });
+
+    // Merge grades into courses
+    const coursesWithGrades = courses.map(course => {
+      const enrollment = userWithEnrollments.courses.find(enrollment => enrollment.courseId.equals(course._id));
+      return {
+        ...course,
+        grades: enrollment ? enrollment.grades : null
+      };
+    });
+
+    // Send the courses with grades in the response
+    res.status(200).json(coursesWithGrades);
+  } catch (error) {
+    // Handle potential errors
+    res.status(500).json({ error: error.message });
+  }
+};

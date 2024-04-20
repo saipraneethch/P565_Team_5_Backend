@@ -44,12 +44,10 @@ export const getAssignments = async (req, res) => {
     res.status(200).json({ data: assignments });
   } catch (error) {
     console.error("Failed to fetch assignments:", error);
-    res
-      .status(500)
-      .json({
-        message: "An error occurred while fetching assignments.",
-        error: error.toString(),
-      });
+    res.status(500).json({
+      message: "An error occurred while fetching assignments.",
+      error: error.toString(),
+    });
   }
 };
 
@@ -136,54 +134,53 @@ export const updateAssignment = async (req, res) => {
 };
 
 export const submitAssignment = async (req, res) => {
-    try {
-      // Extract data from request body
-      const { assignment_id, user, fileUrl, fileType } = req.body;
-  
-      // Find the assignment by ID
-      const assignment = await assignmentModel.findById(
-        assignment_id.assignment_id
-      );
-  
-      if (!assignment) {
-        return res.status(404).json({ error: "Assignment not found" });
-      }
-  
-      // Check if the student has already submitted the assignment
-      const existingSubmission = assignment.submissions.find(
-        (submission) => submission.student.toString() === user.toString()
-      );
-  
-      if (existingSubmission) {
-          // Append new file URL to existing submission's submissionContent array
-          existingSubmission.submissionContent.push(fileUrl);
-          
-          // Add the current date and time to the submittedOn array
-          existingSubmission.submittedOn.push(Date.now());
-        }
-         else {
-        // Create new submission object
-        const newSubmission = {
-          student: user,
-          submissionType: fileType,
-          submissionContent: [fileUrl], // Create an array with the new file URL
-          submittedOn: [Date.now()] 
-        };
-        // Add new submission to submissions array
-        assignment.submissions.push(newSubmission);
-      }
-  
-      // Save the updated assignment
-      await assignment.save();
-  
-      // Respond with success message
-      res.status(200).json({ message: "Assignment submitted successfully" });
-    } catch (error) {
-      // Handle errors
-      console.error(error);
-      res.status(500).json({ error: "Internal server error" });
+  try {
+    // Extract data from request body
+    const { assignment_id, user, fileUrl, fileType } = req.body;
+
+    // Find the assignment by ID
+    const assignment = await assignmentModel.findById(
+      assignment_id.assignment_id
+    );
+
+    if (!assignment) {
+      return res.status(404).json({ error: "Assignment not found" });
     }
-  };
+
+    // Check if the student has already submitted the assignment
+    const existingSubmission = assignment.submissions.find(
+      (submission) => submission.student.toString() === user.toString()
+    );
+
+    if (existingSubmission) {
+      // Append new file URL to existing submission's submissionContent array
+      existingSubmission.submissionContent.push(fileUrl);
+
+      // Add the current date and time to the submittedOn array
+      existingSubmission.submittedOn.push(Date.now());
+    } else {
+      // Create new submission object
+      const newSubmission = {
+        student: user,
+        submissionType: fileType,
+        submissionContent: [fileUrl], // Create an array with the new file URL
+        submittedOn: [Date.now()],
+      };
+      // Add new submission to submissions array
+      assignment.submissions.push(newSubmission);
+    }
+
+    // Save the updated assignment
+    await assignment.save();
+
+    // Respond with success message
+    res.status(200).json({ message: "Assignment submitted successfully" });
+  } catch (error) {
+    // Handle errors
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 export const getSubmittedFiles = async (req, res) => {
   try {
@@ -203,17 +200,21 @@ export const getSubmittedFiles = async (req, res) => {
       (submission) => submission.student.toString() === user_id
     );
     if (!submission) {
-        return res.status(404).json({ error: "Submission not found" });
-      }
-  
-      const submittedFiles = submission.submissionContent.map((content, index) => ({
+      return res.status(404).json({ error: "Submission not found" });
+    }
+
+    const submittedFiles = submission.submissionContent.map(
+      (content, index) => ({
         content,
-        submittedOn: Array.isArray(submission.submittedOn) ? 
-          new Date(submission.submittedOn[index]).toLocaleString() : 
-          new Date(submission.submittedOn).toLocaleString()
-      }));
-     // Sort the submittedFiles array by submittedOn date in descending order
-submittedFiles.sort((a, b) => new Date(b.submittedOn) - new Date(a.submittedOn));
+        submittedOn: Array.isArray(submission.submittedOn)
+          ? new Date(submission.submittedOn[index]).toLocaleString()
+          : new Date(submission.submittedOn).toLocaleString(),
+      })
+    );
+    // Sort the submittedFiles array by submittedOn date in descending order
+    submittedFiles.sort(
+      (a, b) => new Date(b.submittedOn) - new Date(a.submittedOn)
+    );
 
     res.status(200).json({ submittedFiles });
   } catch (error) {
@@ -336,42 +337,235 @@ export const getStudentSubmittedAssignment = async (req, res) => {
   }
 };
 
-export const submitFeedbackGrade = async (req, res) => {
-    const { student_id, assignment_id, feedback, grade } = req.body;
+const calculateCumulativeGrade = async (userId, courseId) => {
+  try {
+    // Ensure courseId is a valid ObjectId
+    const validCourseId = new mongoose.Types.ObjectId(courseId);
 
-    try {
-        // Validate input data
-        if (!student_id || !assignment_id) {
-            return res.status(400).json({ error: "Student ID and Assignment ID are required" });
-        }
+    // Fetch all assignments for the given courseId
+    const assignments = await assignmentModel
+      .find({ course: validCourseId })
+      .populate({
+        path: "submissions.student",
+        match: { _id: userId }, // Ensure only submissions by the given user are populated
+      });
 
-        // Find the assignment by ID
-        const assignment = await assignmentModel.findOne({ _id: assignment_id });
-
-        if (!assignment) {
-            return res.status(404).json({ error: "Assignment not found" });
-        }
-
-        // Find the student in the assignment
-        const student = assignment.submissions.find(submission => submission.student.toString() === student_id);
-
-        if (!student) {
-            return res.status(404).json({ error: "Student not found in the assignment" });
-        }
-
-        // Update student's grade and feedback
-        student.grade = grade;
-        student.feedback.push(feedback) 
-
-        // Save the assignment
-        await assignment.save();
-
-        // Return success response
-        return res.status(200).json({ message: "Feedback and grade submitted successfully" });
-    } catch (error) {
-        console.error("Error submitting feedback and grade:", error);
-        return res.status(500).json({ error: "Internal server error" });
+    if (!assignments || assignments.length === 0) {
+      console.log("No assignments found for this course.");
+      return null; // No assignments, return null
     }
+
+    // Array to store grades
+    let grades = [];
+
+    // Iterate over each assignment
+    assignments.forEach((assignment) => {
+      // Iterate over submissions to find submissions by the user
+      assignment.submissions.forEach((submission) => {
+        if (
+          submission.student &&
+          submission.student._id.toString() === userId.toString()
+        ) {
+          // Check if the submission has a grade and add to the grades array
+          if (submission.grade !== null && submission.grade !== undefined) {
+            grades.push(submission.grade);
+          }
+        }
+      });
+    });
+
+    if (grades.length > 0) {
+      const totalGrade = grades.reduce((acc, grade) => acc + grade, 0);
+      const cumulativeGrade = totalGrade / grades.length;
+      console.log("Cumulative Grade:", cumulativeGrade);
+
+      const user = await userModel.findById(userId);
+      if (!user) {
+        console.error("User not found");
+        return null;
+      }
+
+      const courseIndex = user.courses.findIndex(
+        (course) => course.courseId.toString() === courseId.toString()
+      );
+      if (courseIndex === -1) {
+        console.error("Course not found for the user");
+        return null;
+      }
+
+      user.courses[courseIndex].grades = cumulativeGrade;
+      await user.save();
+    } else {
+      console.log("No grades available to calculate cumulative grade.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error in processing cumulative grade:", error);
+    throw new Error("Failed to process cumulative grade");
+  }
+};
+
+export const submitFeedbackGrade = async (req, res) => {
+  const { student_id, assignment_id, feedback, grade } = req.body;
+
+  try {
+    // Validate input data
+    if (!student_id || !assignment_id) {
+      return res
+        .status(400)
+        .json({ error: "Student ID and Assignment ID are required" });
+    }
+
+    // Find the assignment by ID
+    const assignment = await assignmentModel.findOne({ _id: assignment_id });
+
+    if (!assignment) {
+      return res.status(404).json({ error: "Assignment not found" });
+    }
+
+    // Find the student in the assignment
+    const student = assignment.submissions.find(
+      (submission) => submission.student.toString() === student_id
+    );
+
+    if (!student) {
+      return res
+        .status(404)
+        .json({ error: "Student not found in the assignment" });
+    }
+
+    // Update student's grade and feedback
+    student.grade = grade;
+
+    // Append username to feedback
+    const updatedFeedback = feedback + " - " + " Prof.";
+
+    if (updatedFeedback.trim() !== "") {
+      student.feedback.push(updatedFeedback);
+    }
+
+    // Save the assignment
+    await assignment.save();
+
+    // Calculate cumulative grade after updating grade for assignment
+    await calculateCumulativeGrade(student_id, assignment.course);
+
+    // Return success response
+    return res
+      .status(200)
+      .json({ message: "Feedback and grade submitted successfully" });
+  } catch (error) {
+    console.error("Error submitting feedback and grade:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+export const getAssignmentGrades = async (req, res) => {
+  try {
+    const { course_id, user_id } = req.body;
+    
+    const assignments = await assignmentModel.find({
+      course: course_id,
+      "submissions.student": user_id
+    });
+
+    // If assignments are found, send them in the response
+    if (assignments) {
+      res.status(200).json(assignments);
+    } else {
+      // If no assignments are found, send an appropriate response
+      res.status(404).json({ error: "No assignments found for the given criteria." });
+    }
+  } catch (error) {
+    // Handle any errors that occur during the database query
+    console.error("Error fetching assignment grades:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const submitUserFeedback = async (req, res) => {
+  const { user_id, username, assignment_id, feedback } = req.body;
+
+  try {
+    // Validate input data
+    if (!user_id || !assignment_id) {
+      return res
+        .status(400)
+        .json({ error: "Student ID and Assignment ID are required" });
+    }
+
+    // Find the assignment by ID
+    const assignment = await assignmentModel.findOne({ _id: assignment_id });
+
+    if (!assignment) {
+      return res.status(404).json({ error: "Assignment not found" });
+    }
+
+    // Find the student in the assignment
+    const student = assignment.submissions.find(
+      (submission) => submission.student.toString() === user_id
+    );
+
+    if (!student) {
+      return res
+        .status(404)
+        .json({ error: "Student not found in the assignment" });
+    }
+
+    // Append username to feedback
+    const updatedFeedback = feedback + " - " + username + " (student)";
+
+    if (updatedFeedback.trim() !== "") {
+      student.feedback.push(updatedFeedback);
+    }
+
+    // Save the assignment
+    await assignment.save();
+
+    // Return success response
+    return res
+      .status(200)
+      .json({ message: "Feedback submitted successfully" });
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+export const getStudentDetails = async (req, res) => {
+  const { course_id, student_id } = req.params;
+
+  try {
+    // Fetch all assignments for the given courseId
+    const assignments = await assignmentModel
+      .find({ course: course_id })
+      .populate({
+        path: "submissions.student",
+        match: { _id: student_id }, // Ensure only submissions by the given user are populated
+      });
+
+    if (!assignments || assignments.length === 0) {
+      console.log("No assignments found for this course.");
+      return res.status(404).json({ message: "No assignments found for this course." });
+    }
+
+    const user = await userModel.findById(student_id);
+    if (!user) {
+      console.error("User not found");
+      return res.status(404).json({ message: "User not found." });
+    }
+    const course = user.courses.find(course => course.courseId.toString() === course_id);
+
+    console.log(assignments[0].submissions)
+
+
+    return res.status(200).json({ student_grade: course.grades, data: { assignments } });
+  } catch (error) {
+    console.error("Failed to fetch student details:", error);
+    return res.status(500).json({ message: "Failed to fetch student details." });
+  }
 };
 
 export const getStudentAssignments = async (req, res) => {
@@ -379,7 +573,6 @@ export const getStudentAssignments = async (req, res) => {
     if (!student_id) {
         return res.status(404).json({ message: "Student not found." });
     }
-    //console.log(student_id)
     try {
         if (!mongoose.isValidObjectId(student_id)) {
             return res.status(400).json({ message: "Invalid student ID." });
@@ -387,23 +580,25 @@ export const getStudentAssignments = async (req, res) => {
 
         // First, fetch the student to get their enrolled courses
         const student = await userModel.findById(student_id).populate({
+            
             path: 'courses.courseId', // Ensure this matches your user model's course reference structure
             populate: { path: 'assignments' } // Populate the assignments of each course
         });
-        console.log(JSON.stringify(student.courses, null, 2));
+        // console.log(JSON.stringify(student.courses, null, 2));
 
-
-        // Extract assignments from each course
+        console.log(student.courses)
         const assignments = student.courses.reduce((acc, courseEntry) => {
             const courseAssignments = courseEntry.courseId.assignments.map(assignment => ({
                 ...assignment._doc,
                 courseName: courseEntry.courseId.title // Adding course title to each assignment for clarity
             }));
+            console.log(acc.concat(courseAssignments))
             return acc.concat(courseAssignments);
         }, []);
-
         if (assignments.length === 0) {
-            return "There are no assignments!";
+          return res
+          .status(404)
+          .json({ message: "No assignments found for the provided IDs." });
         }
 
         res.status(200).json({ data: assignments });
