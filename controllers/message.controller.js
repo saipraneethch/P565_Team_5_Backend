@@ -4,70 +4,137 @@ import Message from "../models/message.model.js";
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
+
 export const sendMessage = async (req, res) => {
-    console.log("message sent", req.params.id)
+    console.log("Sending message to conversation ID", req.params.id)
     try {
-        const { message } = req.body;//message content
-        const { id: receiverId } = req.params;//destructuring
-        // console.log("req" + req);
-        // console.log("message " + message);
-        // console.log("user " + req.user);
+        const { message } = req.body; // Extract message content from body
+        const { id: conversationId } = req.params; // Get conversation ID from params
+        const senderId = req.user._id; // Get sender ID from user context
 
-        const senderId = req.user._id;
+        // Find the conversation by ID directly
+        let conversation = await Conversation.findById(conversationId);
 
-        let conversation = await Conversation.findOne({
-            participants: { $all: [senderId, receiverId] },
-        });
-
-        if (!conversation) {//if conversation does not exist
-            conversation = await Conversation.create({
-                participants: [senderId, receiverId],
-                //default empty messages array
-            });
+        if (!conversation) {
+            return res.status(404).json({ error: "Conversation not found" });
         }
 
+        // Check if the sender is a participant of the conversation
+        if (!conversation.participants.includes(senderId)) {
+            return res.status(403).json({ error: "Sender is not a participant of the conversation" });
+        }
+
+        // Create a new message
         const newMessage = new Message({
+            conversationId,
             senderId,
-            receiverId,
-            message,
+            message: message, // Assuming the field in the Message model is named 'text'
         });
 
         if (newMessage) {
-            conversation.messages.push(newMessage._id);
+            conversation.messages.push(newMessage._id); // Add message ID to conversation
+            await conversation.save(); // Save updated conversation
+            await newMessage.save(); // Save new message
+
+            res.status(201).json(newMessage);
+        } else {
+            res.status(400).json({ error: "Failed to create message" });
         }
 
-        await Promise.all([conversation.save(), newMessage.save()]);
-
-        //socket io functionality to add here
-
-        res.status(201).json(newMessage);
-
     } catch (error) {
-        console.log("error in sent message controller", error.message);
+        console.log("Error in send message controller", error.message);
         res.status(500).json({ error: "Internal server error" });
-    };
+    }
 };
 
 export const getMessages = async (req, res) => {
     try {
-        const { id: userToChatId } = req.params;
+        const { id: conversationId } = req.params;
         const senderId = req.user._id;
 
-        const conversation = await Conversation.findOne({
-            participants: { $all: [senderId, userToChatId] },
-        }).populate("messages");//returns objects instead of ids
+        const conversation = await Conversation.findById(conversationId).populate("messages");
 
-        if(!conversation){
-            return res.status(200).json([]);
+        if (!conversation) {
+            return res.status(404).json([]);
         }
-        
-        const messages=conversation.messages;
+
+        if (!conversation.participants.includes(senderId)) {
+            return res.status(403).json({ error: "Unauthorized access to the conversation" });
+        }
+
+        const messages = conversation.messages;
         res.status(200).json(messages);
 
-
     } catch (error) {
-        console.log("error in sent message controller", error.message);
+        console.log("Error in get messages controller", error.message);
         res.status(500).json({ error: "Internal server error" });
     };
 };
+
+// export const sendMessage = async (req, res) => {
+//     console.log("message sent", req.params.id)
+//     try {
+//         const { message } = req.body;//message content
+//         const { id: receiverId } = req.params;//destructuring
+//         // console.log("req" + req);
+//         // console.log("message " + message);
+//         // console.log("user " + req.user);
+
+//         const senderId = req.user._id;
+
+//         let conversation = await Conversation.findOne({
+//             participants: { $all: [senderId, receiverId] },
+//         });
+
+//         if (!conversation) {//if conversation does not exist
+//             conversation = await Conversation.create({
+//                 participants: [senderId, receiverId],
+//                 //default empty messages array
+//             });
+//         }
+
+//         const newMessage = new Message({
+//             senderId,
+//             receiverId,
+//             message,
+//         });
+
+//         if (newMessage) {
+//             conversation.messages.push(newMessage._id);
+//         }
+
+//         await Promise.all([conversation.save(), newMessage.save()]);
+
+//         //socket io functionality to add here
+
+//         res.status(201).json(newMessage);
+
+//     } catch (error) {
+//         console.log("error in sent message controller", error.message);
+//         res.status(500).json({ error: "Internal server error" });
+//     };
+// };
+
+// export const getMessages = async (req, res) => {
+//     try {
+//         const { id: userToChatId } = req.params;
+//         const senderId = req.user._id;
+
+//         const conversation = await Conversation.findOne({
+//             participants: { $all: [senderId, userToChatId] },
+//         }).populate("messages");//returns objects instead of ids
+
+//         if(!conversation){
+//             return res.status(200).json([]);
+//         }
+        
+//         const messages=conversation.messages;
+//         res.status(200).json(messages);
+
+
+//     } catch (error) {
+//         console.log("error in sent message controller", error.message);
+//         res.status(500).json({ error: "Internal server error" });
+//     };
+// };
 
