@@ -592,7 +592,7 @@ export const getStudentAssignments = async (req, res) => {
                 ...assignment._doc,
                 courseName: courseEntry.courseId.title // Adding course title to each assignment for clarity
             }));
-            
+            console.log(acc.concat(courseAssignments))
             return acc.concat(courseAssignments);
         }, []);
         if (assignments.length === 0) {
