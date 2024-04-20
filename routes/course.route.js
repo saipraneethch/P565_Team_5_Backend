@@ -1,5 +1,5 @@
 import express from 'express';
-import {addCourse,getCourses,getAllInstructors, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses,getInstructorCourses,getEnrolledStudents, uploadContent, displayContent,deleteContent} from '../controllers/course.controller.js';
+import {addCourse,getCourses,getAllInstructors, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses,getInstructorCourses,getEnrolledStudents, uploadContent, displayContent,deleteContent,getCourseGrades} from '../controllers/course.controller.js';
 
 const courseRouter = express.Router();
 
@@ -25,5 +25,7 @@ courseRouter.post('/upload-content',uploadContent)
 courseRouter.get('/display-content/:id',displayContent)
 
 courseRouter.delete('/delete-content/:id',deleteContent)
+
+courseRouter.get('/get-course-grades/:username',getCourseGrades)
 
 export default courseRouter;
