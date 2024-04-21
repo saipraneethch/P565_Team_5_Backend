@@ -52,6 +52,11 @@ export const registrationUser = CatchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("Username already exists", 400));
     }
 
+    if (!validator.isStrongPassword(password)){
+      return next(new ErrorHandler("Password is not strong enough.\nA strong password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.", 400));
+      
+  }
+
     const user = {
       first_name,
       last_name,
@@ -128,7 +133,7 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
   try {
     const { activation_code } = req.body;
     const activation_token = req.cookies.activationToken;
-    console.log({ activation_token, activation_code });
+   
     const newUser = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
 
     if (newUser.activationCode !== activation_code) {
@@ -269,7 +274,7 @@ export const updatePasswordCode = async (req, res) => {
     const { activation_code } = req.body; // User-submitted OTP
     const activation_token = req.cookies.activationToken; // Token from cookies
 
-    console.log({ activation_token, activation_code });
+   
 
     // Check if activation token is provided
     if (activation_code === undefined || activation_code.trim() === '')
@@ -279,7 +284,7 @@ export const updatePasswordCode = async (req, res) => {
 
     // Verify the activation token
     const decoded = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
-    console.log(decoded.activationCode);
+  
     // Compare the OTP from the user input against the one stored in the token
     if (decoded.activationCode !== activation_code) {
       throw Error("Invalid activation code");

@@ -110,6 +110,11 @@ export const updateUser = async (req, res) => {
     }
 
     try {
+        if ('password' in req.body) {
+            // Hash the password before updating
+            req.body.password = await bcrypt.hash(req.body.password, 10);
+        }
+        
         // Attempt to update the user
         const user = await userModel.findOneAndUpdate({ _id: id }, { ...req.body }, { new: true, runValidators: true });
 
