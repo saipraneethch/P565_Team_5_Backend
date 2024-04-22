@@ -1,5 +1,5 @@
 import express from 'express';
-import {addCourse,getCourses,getAllInstructors, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses,getInstructorCourses,getEnrolledStudents, uploadContent, displayContent,deleteContent,getCourseGrades} from '../controllers/course.controller.js';
+import {addCourse,getCourses,getAllInstructors, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses,getInstructorCourses,getEnrolledStudents, uploadContent, displayContent,deleteContent,getCourseGrades, getInstructorCoursesForChart, getAdminViewForChart, getStudentCoursesForChart} from '../controllers/course.controller.js';
 
 const courseRouter = express.Router();
 
@@ -27,5 +27,11 @@ courseRouter.get('/display-content/:id',displayContent)
 courseRouter.delete('/delete-content/:id',deleteContent)
 
 courseRouter.get('/get-course-grades/:username',getCourseGrades)
+
+courseRouter.get('/get-instructor-courses-for-charts/:id',getInstructorCoursesForChart)
+
+courseRouter.get('/admin/chart-data',getAdminViewForChart)
+
+courseRouter.get('/student/chart-data/:id',getStudentCoursesForChart)
 
 export default courseRouter;
