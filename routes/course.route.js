@@ -1,5 +1,5 @@
 import express from 'express';
-import {addCourse,getCourses,getAllInstructors, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses,getInstructorCourses,getEnrolledStudents, uploadContent, displayContent,deleteContent,getCourseGrades, getInstructorCoursesForChart, getAdminViewForChart, getStudentCoursesForChart} from '../controllers/course.controller.js';
+import {addCourse,getCourses,getAllInstructors,updateCourse, getSingleInstructor,getCourse,deleteCourse, getEnrolledCourses,getInstructorCourses,getEnrolledStudents, uploadContent, displayContent,deleteContent,getCourseGrades, getInstructorCoursesForChart, getAdminViewForChart, getStudentCoursesForChart} from '../controllers/course.controller.js';
 
 const courseRouter = express.Router();
 
