@@ -31,25 +31,11 @@ app.use(cookieParser());
 // Serve static files from the 'assignmentUploads' directory
 app.use('/assignmentUploads', express.static(path.join(__dirname, 'assignmentUploads')));
 
-const allowedOrigins = process.env.ORIGIN.split(',');
-
 // CORS for resource sharing
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps, curl requests)
-      if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.indexOf(origin) === -1) {
-        var message = 'The CORS policy for this site does not ' +
-                      'allow access from the specified Origin.';
-        return callback(new Error(message), false);
-      }
-      return callback(null, true);
-    },
-    credentials: true
-  })
-);
+app.use(cors({
+  origin: ORIGIN,
+  credentials: true
+}));
 
 // Routes
 app.use("/api/v1", userRouter); //this is the user api endpoint
