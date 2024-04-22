@@ -33,7 +33,7 @@ app.use('/assignmentUploads', express.static(path.join(__dirname, 'assignmentUpl
 
 // CORS for resource sharing
 app.use(cors({
-  origin: ORIGIN,
+  origin: process.env.ORIGIN,
   credentials: true
 }));
 
