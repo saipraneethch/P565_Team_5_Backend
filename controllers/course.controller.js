@@ -1,6 +1,6 @@
 import express from "express";
 import userModel from "../models/user.model.js";
-import courseModel from "../models/course.model.js";
+import courseModel from "../models/course.model.js"; 
 import moduleModel from "../models/modules.model.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
@@ -322,3 +322,197 @@ export const getCourseGrades = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getInstructorCoursesForChart = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const courses = await courseModel.find({ instructor: id });
+
+    const users = await userModel.find();
+
+    // Create an empty object to store course details
+    // Assuming `courses` is an array of course objects and `users` is an array of user objects
+
+    // Create a dictionary with course ID as key
+    const courseSummary = {};
+
+    // Populate course details for each course
+    courses.forEach((course) => {
+      const courseId = course._id.toString();
+      const courseCode = course.code;
+      const courseTitle = course.title;
+
+      // Find users enrolled in this course
+      const enrolledUsers = users.filter((user) =>
+        user.courses.some(
+          (userCourse) => userCourse.courseId.toString() === courseId
+        )
+      );
+
+      // Count the number of users enrolled
+      const numberOfUsersEnrolled = enrolledUsers.length;
+
+      // Calculate the average grade for this course
+      const grades = enrolledUsers
+        .map((user) =>
+          user.courses.find(
+            (userCourse) => userCourse.courseId.toString() === courseId
+          )
+        )
+        .map((userCourse) => userCourse.grades)
+        .filter((grade) => grade !== null);
+
+      const averageGrade =
+        grades.length > 0
+          ? grades.reduce((a, b) => a + b, 0) / grades.length
+          : null;
+
+      // Add to the course summary
+      courseSummary[courseId] = {
+        courseCode,
+        courseTitle,
+        numberOfUsersEnrolled,
+        averageGrade,
+      };
+    });
+
+
+    // Respond with the coursesData object
+    res.json(courseSummary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getAdminViewForChart = async (req, res) => {
+  try {
+    const courses = await courseModel.find(); // Get all courses
+    const users = await userModel.find(); // Get all users
+
+    // Create a dictionary with course ID as key
+    const courseSummary = {};
+
+    // Populate course details for each course
+    courses.forEach((course) => {
+      const courseId = course._id.toString();
+      const courseCode = course.code;
+      const courseTitle = course.title;
+
+      // Find users enrolled in this course
+      const enrolledUsers = users.filter((user) =>
+        user.courses.some(
+          (userCourse) => userCourse.courseId.toString() === courseId
+        )
+      );
+
+      // Count the number of users enrolled
+      const numberOfUsersEnrolled = enrolledUsers.length;
+
+      // Add to the course summary
+      courseSummary[courseId] = {
+        courseCode,
+        courseTitle,
+        numberOfUsersEnrolled,
+      };
+    });
+
+
+    // Initialize an empty object to store the count of each role
+    const userSummary = {};
+
+    // Iterate over each user to count the roles
+    users.forEach((user) => {
+      const role = user.role;
+
+      // If the role is already in the userSummary, increment the count
+      if (userSummary[role]) {
+        userSummary[role]++;
+      } else {
+        // Otherwise, initialize the count for this role
+        userSummary[role] = 1;
+      }
+    });
+
+    // Respond with the combined data object
+    res.json({ courseSummary, userSummary });
+  } catch (error) {
+    console.error('Error fetching data:', error); // Log the error
+    res.status(500).json({ error: 'An error occurred while fetching admin view data.' });
+  }
+};
+
+
+export const getStudentCoursesForChart = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Fetch student by ID
+    const student = await userModel.findById(id);
+
+    // If no student is found, return a 404 response
+    if (!student) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Extract the course IDs from the student's courses
+    const enrolledCourseIds = student.courses.map((c) => c.courseId);
+
+    // Fetch all courses where the _id is in enrolledCourseIds
+    const courses = await courseModel.find({
+      _id: { $in: enrolledCourseIds },
+    });
+
+    // Fetch all students to calculate grade statistics
+    const all_students = await userModel.find();
+
+    // Initialize an empty object for the student summary
+    const studentSummary = {};
+
+    // Iterate over the courses to build studentSummary
+    courses.forEach((course) => {
+      const courseId = course._id.toString();
+      const courseCode = course.code;
+      const courseTitle = course.title;
+
+      // Find the student's grade for this course
+      const studentCourse = student.courses.find(
+        (c) => c.courseId.toString() === courseId
+      );
+      const studentGrade = studentCourse?.grades ?? "N/A"; // Student's grade
+
+      // Get the grades for all students in this course
+      const grades = all_students
+        .map((student) => {
+          const course = student.courses.find(
+            (c) => c.courseId.toString() === courseId
+          );
+          return course?.grades;
+        })
+        .filter((grade) => grade !== null && grade !== undefined); // Filter out null or undefined grades
+
+      // Calculate grade statistics
+      const averageGrade = grades.length > 0 ? (grades.reduce((sum, g) => sum + g, 0) / grades.length).toFixed(2) : "N/A";
+      const maxGrade = grades.length > 0 ? Math.max(...grades) : "N/A";
+      const minGrade = grades.length > 0 ? Math.min(...grades) : "N/A";
+
+      // Add the course details to studentSummary
+      studentSummary[courseId] = {
+        courseCode,
+        courseTitle,
+        studentGrade,
+        averageGrade,
+        maxGrade,
+        minGrade,
+      };
+    });
+
+    console.log(studentSummary)
+
+    // Send the studentSummary as the response
+    res.json({ studentSummary });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
