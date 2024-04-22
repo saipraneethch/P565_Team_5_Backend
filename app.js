@@ -32,10 +32,19 @@ app.use(cookieParser());
 app.use('/assignmentUploads', express.static(path.join(__dirname, 'assignmentUploads')));
 
 // CORS for resource sharing
+const allowedOrigins = ['http://localhost:3000', 'https://p565-team-5-frontend.onrender.com'];
+
 app.use(cors({
-  origin: process.env.ORIGIN,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
 
 // Routes
 app.use("/api/v1", userRouter); //this is the user api endpoint
