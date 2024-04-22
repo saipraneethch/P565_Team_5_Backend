@@ -134,8 +134,10 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
     const { activation_code } = req.body;
     const activation_token = req.cookies.activationToken;
     console.log(activation_code);
+    console.log(activation_token);
+    console.log(process.env.ACTIVATION_SECRET);
     const newUser = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
-
+    console.log(newUser.activationCode);
     if (newUser.activationCode !== activation_code) {
       return next(new ErrorHandler("Invalid activation code", 400));
     }
