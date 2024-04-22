@@ -32,7 +32,7 @@ app.use(cookieParser());
 app.use('/assignmentUploads', express.static(path.join(__dirname, 'assignmentUploads')));
 
 // CORS for resource sharing
-const allowedOrigins = ['http://localhost:3000', 'https://p565-team-5-frontend.onrender.com'];
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:8000', 'https://p565-team-5-frontend.onrender.com'];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -51,9 +51,9 @@ app.use("/api/v1", userRouter); //this is the user api endpoint
 app.use("/api/v1/userdetails", editUserRouter);//route, reference to route imported above
 app.use("/api/v1/coursedetails", courseRouter);
 app.use("/api/v1/messages", messageRouter);
-app.use("/api/v1/assignments",assignmentRouter);
-app.use("/api/v1/announcements",announcementsRouter);
-app.use("/api/v1/conversations",conversationRouter);
+app.use("/api/v1/assignments", assignmentRouter);
+app.use("/api/v1/announcements", announcementsRouter);
+app.use("/api/v1/conversations", conversationRouter);
 
 // Testing API
 app.get("/test", (req, res, next) => {
