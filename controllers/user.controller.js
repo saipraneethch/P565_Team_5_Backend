@@ -133,7 +133,7 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
   try {
     const { activation_code } = req.body;
     const activation_token = req.cookies.activationToken;
-   
+    console.log(activation_code);
     const newUser = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
 
     if (newUser.activationCode !== activation_code) {
