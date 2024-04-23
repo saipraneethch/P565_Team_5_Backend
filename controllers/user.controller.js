@@ -134,35 +134,37 @@ export const createActivationToken = (user) => {
 
 
 
-
-// Activate user
-export const activateUser = CatchAsyncError(async (req, res, next) => {
+export const activateUser = async (req, res) => {
   try {
     const { activation_code } = req.body;
-    console.log(activation_code)
+    console.log('Received activation code:', activation_code);
 
     // Extract the token from the Authorization header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return next(new ErrorHandler("No token provided", 401));
+      res.status(401).json({ message: "No token provided" });
+      return;
     }
     const activation_token = authHeader.split(' ')[1]; // Get the token part
 
     const newUser = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
     if (newUser.activationCode !== activation_code) {
-      return next(new ErrorHandler("Invalid activation code", 400));
+      res.status(400).json({ message: "Invalid activation code" });
+      return;
     }
 
     const { first_name, last_name, username, email, password } = newUser.user;
 
     const existUser = await userModel.findOne({ email });
     if (existUser) {
-      return next(new ErrorHandler("Email already exists", 400));
+      res.status(400).json({ message: "Email already exists" });
+      return;
     }
 
     const existUsername = await userModel.findOne({ username });
     if (existUsername) {
-      return next(new ErrorHandler("Username already exists", 400));
+      res.status(400).json({ message: "Username already exists" });
+      return;
     }
 
     const user = await userModel.create({
@@ -177,12 +179,14 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
 
     res.status(200).json({ username, role: user.role, _id: user._id, token });
   } catch (error) {
+    console.error('Error processing activation:', error);
     if (error.name === 'JsonWebTokenError') {
-      return next(new ErrorHandler("Token is invalid", 403));
+      res.status(403).json({ message: "Token is invalid" });
+    } else {
+      res.status(500).json({ message: "Internal server error", error: error.message });
     }
-    return next(new ErrorHandler(error.message, 400));
   }
-});
+};
 
 
 
