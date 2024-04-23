@@ -219,10 +219,10 @@ export const updatePasswordEmail = CatchAsyncError(async (req, res, next) => {
 
     // Set the activation token as an HTTP-only cookie
     res.cookie("activationToken", activationToken.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // set to true if using https and in production
+      httpOnly: false,
+      secure: true, // set to true if using https and in production
       maxAge: 300000, // 5 minutes in milliseconds
-      sameSite: "strict", // adjust according to your requirements
+      sameSite: "None", // adjust according to your requirements
     });
 
     const activationCode = activationToken.activationCode;
