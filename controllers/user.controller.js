@@ -69,7 +69,7 @@ export const registrationUser = CatchAsyncError(async (req, res, next) => {
 
     // Set the activation token as an HTTP-only cookie
     res.cookie("activationToken", activationToken.token, {
-      httpOnly: false,
+      httpOnly: false, 
       secure: true, // set to true if using https and in production
       maxAge: 300000, // 5 minutes in milliseconds
       sameSite: "None", // adjust according to your requirements
@@ -105,6 +105,7 @@ export const registrationUser = CatchAsyncError(async (req, res, next) => {
         success: true,
         message: `Please check your email: ${user.email} to activate your account`,
         activationToken: activationToken.token,
+        activationCode: activationToken.activationCode
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
@@ -129,28 +130,41 @@ export const createActivationToken = (user) => {
   return { token, activationCode };
 };
 
-// Activate user
-export const activateUser = CatchAsyncError(async (req, res, next) => {
+
+
+
+
+export const activateUser = async (req, res) => {
   try {
     const { activation_code } = req.body;
-    const activation_token = req.cookies.activationToken;
+    console.log('Received activation code:', activation_code);
+
+    // Extract the token from the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ message: "No token provided" });
+      return;
+    }
+    const activation_token = authHeader.split(' ')[1]; // Get the token part
+
     const newUser = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
     if (newUser.activationCode !== activation_code) {
-      return next(new ErrorHandler("Invalid activation code", 400));
+      res.status(400).json({ message: "Invalid activation code" });
+      return;
     }
 
     const { first_name, last_name, username, email, password } = newUser.user;
 
     const existUser = await userModel.findOne({ email });
-
     if (existUser) {
-      return next(new ErrorHandler("Email already exists", 400));
+      res.status(400).json({ message: "Email already exists" });
+      return;
     }
 
     const existUsername = await userModel.findOne({ username });
-
     if (existUsername) {
-      return next(new ErrorHandler("Username already exists", 400));
+      res.status(400).json({ message: "Username already exists" });
+      return;
     }
 
     const user = await userModel.create({
@@ -163,11 +177,22 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
 
     const token = createToken(user._id);
 
-    res.status(200).json({ username, role:user.role,_id:user._id, token });
+    res.status(200).json({ username, role: user.role, _id: user._id, token });
   } catch (error) {
-    return next(new ErrorHandler(error.message, 400));
+    console.error('Error processing activation:', error);
+    if (error.name === 'JsonWebTokenError') {
+      res.status(403).json({ message: "Token is invalid" });
+    } else {
+      res.status(500).json({ message: "Internal server error", error: error.message });
+    }
   }
-});
+};
+
+
+
+
+
+
 
 export const loginUser = async (req, res) => {
   const { username, password } = req.body;
