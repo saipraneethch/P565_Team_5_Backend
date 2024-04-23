@@ -130,11 +130,16 @@ export const createActivationToken = (user) => {
   return { token, activationCode };
 };
 
-// Activate user
+
+
+
+
+
 // Activate user
 export const activateUser = CatchAsyncError(async (req, res, next) => {
   try {
     const { activation_code } = req.body;
+    console.log(activation_code)
 
     // Extract the token from the Authorization header
     const authHeader = req.headers.authorization;
@@ -178,6 +183,11 @@ export const activateUser = CatchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler(error.message, 400));
   }
 });
+
+
+
+
+
 
 
 export const loginUser = async (req, res) => {
