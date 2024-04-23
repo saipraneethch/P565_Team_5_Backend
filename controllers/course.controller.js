@@ -2,6 +2,8 @@ import express from "express";
 import userModel from "../models/user.model.js";
 import courseModel from "../models/course.model.js"; 
 import moduleModel from "../models/modules.model.js";
+import assignmentModel from "../models/assignment.model.js"
+import announcementsModel from "../models/announcements.model.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors.js";
 import mongoose from "mongoose";
@@ -122,7 +124,7 @@ export const deleteCourse = async (req, res) => {
 
 export const updateCourse = async (req, res) => {
   const { id } = req.params;
-  console.log(req.body);
+ 
 
   // Validate the ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -157,7 +159,7 @@ export const getAllInstructors = async (req, res) => {
     const instructors = await userModel
       .find({ role: "instructor" })
       .sort({ first_name: 1, last_name: 1 });
-    console.log("instructors", instructors);
+    
     res.status(200).json(instructors);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -237,7 +239,7 @@ export const getEnrolledStudents = async (req, res) => {
 };
 
 export const uploadContent = async (req, res) => {
-  console.log(req.body);
+
   const { title, course, fileUrl, fileType } = req.body;
   try {
     const module = await moduleModel.create({
@@ -507,8 +509,6 @@ export const getStudentCoursesForChart = async (req, res) => {
       };
     });
 
-    console.log(studentSummary)
-
     // Send the studentSummary as the response
     res.json({ studentSummary });
   } catch (error) {
@@ -516,3 +516,78 @@ export const getStudentCoursesForChart = async (req, res) => {
   }
 };
 
+export const getStudentCoursesForDashboard = CatchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    // Fetch the student by ID
+    const student = await userModel.findById(id);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Extract course IDs from student's courses
+    const enrolledCourseIds = student.courses.map((c) => c.courseId);
+
+    // Dictionary to hold course info, assignments, and announcements for each course
+    const coursesInfo = {};
+    const assignments = {};
+    const announcements = {};
+
+    // Fetch the courses to get course metadata (code and title)
+    const courses = await courseModel.find({
+      _id: { $in: enrolledCourseIds },
+    });
+
+    // Populate the coursesInfo dictionary with course code and title
+    courses.forEach((course) => {
+      const courseId = course._id.toString();
+      coursesInfo[courseId] = {
+        courseCode: course.code,
+        courseTitle: course.title,
+      };
+    });
+
+    // Fetch upcoming assignments for all enrolled courses
+    const allAssignments = await assignmentModel.find({
+      course: { $in: enrolledCourseIds },
+      dueDate: { $gte: new Date() }, // Only upcoming assignments
+    }).sort({ dueDate: 1 }); // Sort by due date
+
+    // Group assignments by course ID
+    allAssignments.forEach((assignment) => {
+      const courseId = assignment.course.toString();
+      if (!assignments[courseId]) {
+        assignments[courseId] = [];
+      }
+      assignments[courseId].push(assignment);
+    });
+
+    // Fetch latest announcements for all enrolled courses
+    const allAnnouncements = await announcementsModel.find({
+      course: { $in: enrolledCourseIds },
+    }).sort({ createdAt: -1 }); // Sort by creation date to get latest
+
+    // Group announcements by course ID
+    allAnnouncements.forEach((announcement) => {
+      const courseId = announcement.course.toString();
+      if (!announcements[courseId]) {
+        announcements[courseId] = [];
+      }
+      announcements[courseId].push(announcement);
+    });
+
+    console.log("Courses Info:", coursesInfo);
+    console.log("Assignments:", assignments);
+    console.log("Announcements:", announcements);
+
+    // Return the dictionaries with course info, assignments, and announcements grouped by course ID
+    res.status(200).json({
+      coursesInfo,
+      assignments,
+      announcements,
+    });
+  } catch (error) {
+    return next(new ErrorHandler('Error fetching data for dashboard', 500));
+  }
+});
