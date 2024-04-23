@@ -70,7 +70,7 @@ export const registrationUser = CatchAsyncError(async (req, res, next) => {
     // Set the activation token as an HTTP-only cookie
     res.cookie("activationToken", activationToken.token, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === "production", // set to true if using https and in production
+      secure: true, // set to true if using https and in production
       maxAge: 300000, // 5 minutes in milliseconds
       sameSite: "None", // adjust according to your requirements
     });
