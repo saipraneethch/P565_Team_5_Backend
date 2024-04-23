@@ -110,6 +110,11 @@ export const updateUser = async (req, res) => {
     }
 
     try {
+        // Check if the request body contains 'role' and if it's set to "instructor" or "admin"
+        if ("role" in req.body && (req.body.role.toLowerCase() === "instructor" || req.body.role.toLowerCase() === "admin")) {
+          // If the role is "instructor" or "admin", set the courses array to empty
+          req.body.courses = []; // Reset the courses array
+        }
         if ('password' in req.body) {
             // Hash the password before updating
             req.body.password = await bcrypt.hash(req.body.password, 10);
