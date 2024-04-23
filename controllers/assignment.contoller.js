@@ -438,9 +438,10 @@ export const submitFeedbackGrade = async (req, res) => {
     student.grade = grade;
 
     // Append username to feedback
-    const updatedFeedback = feedback + " - " + " Prof.";
+    
 
-    if (updatedFeedback.trim() !== "") {
+    if (feedback.trim() !== "") {
+      const updatedFeedback = feedback + " - " + " Prof.";
       student.feedback.push(updatedFeedback);
     }
 

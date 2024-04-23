@@ -577,9 +577,7 @@ export const getStudentCoursesForDashboard = CatchAsyncError(async (req, res, ne
       announcements[courseId].push(announcement);
     });
 
-    console.log("Courses Info:", coursesInfo);
-    console.log("Assignments:", assignments);
-    console.log("Announcements:", announcements);
+
 
     // Return the dictionaries with course info, assignments, and announcements grouped by course ID
     res.status(200).json({
